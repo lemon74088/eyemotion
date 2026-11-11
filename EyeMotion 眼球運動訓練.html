@@ -1389,7 +1389,7 @@ function syncMusicBtn(){
 
 function buildCourse(week, len){
   var set = (WEEK_SETS[week] || WEEK_SETS[1]).slice();
-  var prep = len === 3 ? 20 : 25;
+  var prep = 6;
   var gap = len === 3 ? 16 : 22;
   var budget = len * 60;
   var gaps = set.length - 1;
@@ -1411,7 +1411,7 @@ function buildCourse(week, len){
 
 function buildSingle(id){
   var ex = EX[id];
-  var prep = 12;
+  var prep = 5;
   var main = ex.kind === 'rest' ? 40 : 80;
   var segs = [
     { kind: 'prep', id: 'prep', dur: prep, name: '準備' },
