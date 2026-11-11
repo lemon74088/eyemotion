@@ -1389,14 +1389,13 @@ function syncMusicBtn(){
 
 function buildCourse(week, len){
   var set = (WEEK_SETS[week] || WEEK_SETS[1]).slice();
-  var prep = 6;
   var gap = len === 3 ? 16 : 22;
   var budget = len * 60;
   var gaps = set.length - 1;
-  var avail = budget - prep - gaps * gap;
+  var avail = budget - gaps * gap;
   var ws = set.map(function(id){ return EX[id].weight; });
   var sum = ws.reduce(function(a, b){ return a + b; }, 0);
-  var segs = [{ kind: 'prep', id: 'prep', dur: prep, name: '準備' }];
+  var segs = [];
   var used = 0;
   set.forEach(function(id, i){
     var dur;
@@ -1411,10 +1410,8 @@ function buildCourse(week, len){
 
 function buildSingle(id){
   var ex = EX[id];
-  var prep = 5;
   var main = ex.kind === 'rest' ? 40 : 80;
   var segs = [
-    { kind: 'prep', id: 'prep', dur: prep, name: '準備' },
     { kind: 'exercise', id: id, dur: main, name: ex.name }
   ];
   if (id !== 'blink') {
