@@ -432,6 +432,9 @@ input[type="range"]:active::-webkit-slider-thumb{transform:scale(1.15)}
   clip-path:inset(0 0 0 0);transform:scale(.9);opacity:0;
 }
 .rest-ring span{font:500 30px/1 var(--font-mono);color:#CFE0DA;font-variant-numeric:tabular-nums}
+.rest-layer.warn .rlabel{color:#E0A08F}
+.rest-layer.warn .rest-ring span{color:#F0C0B2}
+.rest-layer.warn .rest-ring{border-color:rgba(195,59,46,.45)}
 .task-hud{
   position:absolute;right:16px;top:calc(94px + env(safe-area-inset-top));z-index:3;
   text-align:right;font:500 12px/1.7 var(--font-mono);color:var(--stage-ink-2);font-variant-numeric:tabular-nums;
@@ -844,7 +847,7 @@ input[type="range"]:active::-webkit-slider-thumb{transform:scale(1.15)}
           <button data-sound="0" aria-pressed="true">關閉</button>
           <button data-sound="1" aria-pressed="false">開啟</button>
         </div>
-        <p class="set-hint">僅在段落切換時發出一聲極短的柔音，不自動播放任何聲音。</p>
+        <p class="set-hint">段落切換時一聲短音；短休息最後兩秒會轉為「即將接續」，並在接續時響兩聲上揚提示。關閉後完全靜音。</p>
       </div>
       <div class="set-row">
         <div class="set-label"><span>減少動態</span><output id="outMotion">跟隨系統</output></div>
@@ -1320,17 +1323,23 @@ function audioCtx(){
 }
 
 function blip(freq){
-  if (!DB.settings.sound) return;
+  blipSeq([freq || 620], 0, 0.11);
+}
+
+function blipSeq(freqs, gapMs, amp){
+  if (!DB.settings.sound || !freqs.length) return;
   try {
     var ctx = audioCtx();
-    var o = ctx.createOscillator(), g = ctx.createGain();
-    var t = ctx.currentTime;
-    o.type = 'sine'; o.frequency.value = freq || 620;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.11, t + 0.04);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(t); o.stop(t + 0.75);
+    freqs.forEach(function(f, i){
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      var t = ctx.currentTime + i * (gapMs / 1000);
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(amp || 0.1, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t + 0.9);
+    });
   } catch (e) { /* 靜音環境不影響流程 */ }
 }
 
@@ -1464,6 +1473,7 @@ function onSegStart(){
   var seg = cur();
   if (!seg) return;
   var ex = EX[seg.id];
+  $('#restLayer').classList.remove('warn');
   $('#stageName').textContent = seg.name;
   $('#stagePrompt').innerHTML = seg.kind === 'prep'
     ? '坐姿自然，螢幕略低於視線。<b>任何時候都能停止</b>。'
@@ -1476,6 +1486,7 @@ function onSegStart(){
     rest.classList.remove('show');
   } else if (seg.kind === 'gap') {
     rest.classList.add('show');
+    S.gapWarn = false;
     $('#restLabel').textContent = '短休息';
     $('#restTitle').textContent = '眨眼，或看向遠處';
     $('#restText').textContent = '讓眼睛離開密集注視。倒數結束會自動接續下一個動作。';
@@ -1498,7 +1509,13 @@ function onSegStart(){
 
   var btn = $('#btnPause');
   btn.textContent = '暫停';
-  blip(seg.kind === 'gap' ? 520 : 680);
+
+  var prev = S.idx > 0 ? S.segs[S.idx - 1] : null;
+  if (seg.kind === 'exercise' && prev && prev.kind === 'gap') {
+    blipSeq([660, 880], 260, 0.12);   // 短休息結束：兩聲上揚，提醒回到畫面
+  } else {
+    blip(seg.kind === 'gap' ? 520 : 680);
+  }
   renderProgress();
   $('#stageTotal').textContent = mmss(S.total);
   drawFrame();
@@ -1520,6 +1537,12 @@ function tick(now){
     S.segT += dt;
     S.elapsed += dt;
     var seg = cur();
+    if (seg && seg.kind === 'gap' && !S.gapWarn && seg.dur - S.segT <= 2) {
+      S.gapWarn = true;
+      $('#restLabel').textContent = '即將接續';
+      $('#restText').textContent = '準備回到畫面，下一個動作馬上開始。';
+      $('#restLayer').classList.add('warn');
+    }
     if (seg && S.segT >= seg.dur) advance(S.segT - seg.dur);
   }
   if (S) { drawFrame(); syncHud(); RAF = requestAnimationFrame(tick); }
