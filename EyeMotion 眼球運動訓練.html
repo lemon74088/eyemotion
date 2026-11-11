@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EyeMotion · 眼球運動與視覺放鬆訓練</title>
+<meta name="theme-color" content="#E9EAE4">
+<meta name="description" content="短時、可暫停、可調整的眼球運動與視覺放鬆練習。非醫療診斷或治療方案。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23141816'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23E9EAE4' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23C33B2E'/%3E%3C/svg%3E">
+<style>
+/* ===== 設計語彙：光學儀器 × 紙本印刷 =====
+   紙感淺底承載閱讀，深色視窗承載訓練動作；
+   髮絲線、刻度、等寬數字建立儀器感；單一硃紅作為目標與動作色。 */
+:root{
+  --paper:#E9EAE4;
+  --paper-2:#F4F4EF;
+  --paper-3:#DFE1DA;
+  --ink:#141816;
+  --ink-2:#5C635D;
+  --ink-3:#8D938C;
+  --hair:#C4C7BE;
+  --hair-soft:#D8DAD2;
+  --accent:#C33B2E;
+  --accent-deep:#8C2418;
+  --rest:#25695B;
+  --stage:#0C1110;
+  --stage-2:#131917;
+  --stage-line:#2C3431;
+  --stage-ink:#EBEDE6;
+  --stage-ink-2:#9BA39D;
+  --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft JhengHei UI","PingFang TC","Noto Sans TC","Helvetica Neue",sans-serif;
+  --font-mono:"Cascadia Mono","Consolas","SFMono-Regular",ui-monospace,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --shell:1180px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font:400 15px/1.68 var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.42;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='n' opacity='.055'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+img,svg,canvas{display:block;max-width:100%}
+button{font-family:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ===== 頂欄 ===== */
+.top{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:12px;
+  height:60px;padding:0 18px;
+  background:rgba(233,234,228,.9);
+  backdrop-filter:blur(16px) saturate(120%);
+  -webkit-backdrop-filter:blur(16px) saturate(120%);
+  border-bottom:1px solid var(--hair-soft);
+}
+.brand{display:flex;align-items:center;gap:9px;flex:none}
+.brand svg{width:21px;height:21px}
+.brand b{font-size:16px;font-weight:650;letter-spacing:-.015em}
+.nav{display:none;margin-left:22px;gap:2px}
+.nav button{
+  position:relative;background:none;border:0;padding:9px 12px;
+  font-size:13.5px;letter-spacing:.01em;color:var(--ink-2);cursor:pointer;border-radius:6px;
+  transition:color .2s var(--ease);
+}
+.nav button:hover{color:var(--ink)}
+.nav button[aria-current="true"]{color:var(--ink);font-weight:600}
+.nav button[aria-current="true"]::after{
+  content:"";position:absolute;left:12px;right:12px;bottom:2px;height:1px;background:var(--ink);
+}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.streak{
+  display:none;align-items:center;gap:7px;padding:5px 10px;border:1px solid var(--hair);
+  border-radius:999px;font-size:12px;color:var(--ink-2);
+}
+.streak i{width:5px;height:5px;border-radius:50%;background:var(--rest);display:block}
+.icon-btn{
+  width:38px;height:38px;display:grid;place-items:center;background:none;
+  border:1px solid transparent;border-radius:50%;cursor:pointer;color:var(--ink-2);
+  transition:color .2s,border-color .2s,background .2s;
+}
+.icon-btn:hover{color:var(--ink);border-color:var(--hair)}
+.icon-btn svg{width:19px;height:19px}
+
+/* ===== 版面 ===== */
+.page{max-width:var(--shell);margin:0 auto;padding:0 18px 96px}
+.view[hidden]{display:none}
+.view{animation:viewIn .5s var(--ease) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ===== 首頁主視覺 ===== */
+.hero{display:grid;gap:26px;padding:36px 0 8px}
+.kicker{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);letter-spacing:.02em;
+}
+.kicker::before{content:"";width:18px;height:1px;background:var(--hair)}
+h1{
+  margin:16px 0 16px;font-size:clamp(37px,10.6vw,66px);line-height:1.03;
+  letter-spacing:-.038em;font-weight:600;
+}
+h1 span{display:block;color:var(--ink-3);font-weight:450}
+.lede{margin:0;max-width:34em;font-size:15px;line-height:1.72;color:var(--ink-2)}
+.hero-actions{display:flex;align-items:center;gap:16px;margin-top:26px;flex-wrap:wrap}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  height:56px;padding:0 24px 0 22px;border:0;border-radius:999px;
+  background:var(--ink);color:#F1F2EC;font-size:15.5px;font-weight:600;letter-spacing:.01em;
+  cursor:pointer;
+  box-shadow:0 14px 28px -16px rgba(20,24,22,.7),0 2px 4px rgba(20,24,22,.16);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),background .22s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 34px -18px rgba(20,24,22,.75),0 3px 8px rgba(20,24,22,.18)}
+.btn-primary:active{transform:scale(.982)}
+.btn-primary svg{width:17px;height:17px;flex:none}
+.btn-primary .len{
+  font:600 12px/1 var(--font-mono);padding:4px 7px;border-radius:4px;
+  background:rgba(255,255,255,.13);color:#E8E9E3;
+}
+.btn-text{
+  background:none;border:0;padding:8px 2px;font-size:14px;color:var(--ink-2);cursor:pointer;
+  border-bottom:1px solid var(--hair);transition:color .2s,border-color .2s;
+}
+.btn-text:hover{color:var(--ink);border-color:var(--ink)}
+.len-inline{
+  display:flex;align-items:center;gap:12px;margin-top:18px;max-width:330px;
+  padding-top:14px;border-top:1px solid var(--hair-soft);
+}
+.len-inline label{font-size:12px;color:var(--ink-3);letter-spacing:.02em;flex:none}
+.len-inline input[type="range"]{flex:1;min-width:0;height:32px}
+.len-inline output{font:500 12px/1 var(--font-mono);color:var(--ink-2);min-width:46px;text-align:right}
+
+/* 訓練視窗（首頁示範） */
+.viewer{
+  position:relative;background:var(--stage);border-radius:10px;overflow:hidden;
+  aspect-ratio:16/10;
+  box-shadow:0 26px 46px -30px rgba(12,17,16,.85),0 2px 0 rgba(255,255,255,.35) inset;
+}
+.viewer canvas{width:100%;height:100%}
+.viewer::after{
+  content:"";position:absolute;inset:14px;border:1px solid rgba(235,237,230,.13);
+  border-radius:3px;pointer-events:none;
+}
+.viewer::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(120% 90% at 50% 45%,transparent 45%,rgba(0,0,0,.35) 100%);
+}
+.viewer-cap{
+  position:absolute;left:20px;right:20px;bottom:14px;z-index:2;
+  display:flex;justify-content:space-between;gap:10px;
+  font:500 11px/1 var(--font-mono);letter-spacing:.06em;color:rgba(235,237,230,.55);
+}
+.viewer-cap span:first-child{color:rgba(235,237,230,.8)}
+
+/* 首頁數據列 */
+.facts{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin:30px 0 0;
+  border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+  background:var(--hair);
+}
+.facts div{background:var(--paper);padding:15px 2px 16px}
+.facts dt{font-size:11.5px;color:var(--ink-3);letter-spacing:.02em;margin:0 0 5px}
+.facts dd{margin:0;font:600 22px/1.15 var(--font-mono);font-variant-numeric:tabular-nums}
+.facts dd small{font:400 11px/1 var(--font-ui);color:var(--ink-2);margin-left:3px}
+
+/* 本週刻度條 */
+.week-strip{margin-top:34px}
+.strip-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.strip-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.005em}
+.strip-head .sub{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tick-chart{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tick-col{display:grid;gap:6px}
+.tick-col .bars{display:flex;flex-direction:column-reverse;justify-content:flex-start;gap:3px;height:44px}
+.tick-col .bars i{
+  flex:none;width:100%;height:9px;background:var(--paper-3);border-radius:1px;
+  transition:background .3s var(--ease);
+}
+.tick-col .bars i.on{background:var(--rest)}
+.tick-col .bars i.accent{background:var(--accent)}
+.tick-col label{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tick-col.now label{color:var(--ink);font-weight:600}
+.tick-col.now .bars i{background:var(--paper-3)}
+.tick-col.now .bars i.on{background:var(--ink)}
+
+/* ===== 模組清單 ===== */
+.section{margin-top:52px}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:6px}
+.section-head h2{margin:0;font-size:20px;letter-spacing:-.02em;font-weight:600}
+.section-head p{margin:6px 0 0;font-size:13.5px;color:var(--ink-2);max-width:34em}
+.group-label{
+  display:flex;align-items:center;gap:8px;margin:26px 0 0;font-size:11.5px;
+  letter-spacing:.08em;color:var(--ink-3);
+}
+.group-label::after{content:"";flex:1;height:1px;background:var(--hair-soft)}
+.mod-list{border-top:1px solid var(--hair-soft);margin-top:8px}
+.mod-row{
+  display:grid;grid-template-columns:56px 1fr 26px;align-items:center;gap:14px;
+  width:100%;padding:13px 0;background:none;border:0;border-bottom:1px solid var(--hair-soft);
+  text-align:left;cursor:pointer;transition:background .2s,padding .25s var(--ease);
+}
+.mod-row:hover{background:rgba(255,255,255,.4);padding-left:8px;padding-right:8px}
+.mod-thumb{width:56px;height:38px;border:1px solid var(--hair);border-radius:3px;background:var(--paper-2);display:grid;place-items:center}
+.mod-thumb svg{width:44px;height:26px}
+.mod-main{min-width:0}
+.mod-name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.mod-tag{font:500 10px/1 var(--font-ui);padding:3px 6px;border-radius:3px;color:var(--ink-2);background:var(--paper-3);letter-spacing:.04em;font-style:normal}
+.mod-tag.task{background:rgba(195,59,46,.1);color:var(--accent-deep)}
+.mod-desc{display:block;margin-top:3px;font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod-arrow{color:var(--ink-3);font:400 16px/1 var(--font-ui);text-align:right}
+
+/* ===== 四周計畫 ===== */
+.plan-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 8px}
+.week-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  padding:7px 12px;border:1px solid var(--hair);background:transparent;border-radius:999px;
+  font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:all .2s var(--ease);
+}
+.chip:hover{border-color:var(--ink-2);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F1F2EC}
+.timeline{
+  margin-top:22px;display:grid;gap:0;--rail:26px;
+}
+.tl-row{display:grid;grid-template-columns:var(--rail) 1fr;column-gap:14px;padding-bottom:26px;position:relative}
+.tl-rail{position:relative;display:flex;justify-content:center}
+.tl-rail::before{
+  content:"";position:absolute;top:0;bottom:-26px;left:50%;width:1px;background:var(--hair);
+  transform:translateX(-.5px);
+}
+.tl-row:last-child .tl-rail::before{bottom:auto;height:14px}
+.tl-dot{
+  position:relative;z-index:1;width:9px;height:9px;margin-top:6px;border-radius:50%;
+  background:var(--paper);border:1px solid var(--ink-3);
+}
+.tl-row.active .tl-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 4px rgba(195,59,46,.12)}
+.tl-row.done .tl-dot{background:var(--ink);border-color:var(--ink)}
+.tl-card{padding-bottom:4px}
+.tl-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tl-week{font:600 11.5px/1 var(--font-mono);letter-spacing:.06em;color:var(--ink-3);padding-top:3px}
+.tl-title{font-size:16px;font-weight:600;letter-spacing:-.015em}
+.tl-badge{font-size:11px;padding:3px 7px;border-radius:3px;background:rgba(195,59,46,.1);color:var(--accent-deep)}
+.tl-body{
+  margin-top:9px;display:grid;gap:8px;font-size:13px;color:var(--ink-2);
+}
+.tl-body div{display:grid;grid-template-columns:74px 1fr;gap:10px;align-items:baseline}
+.tl-body b{font-weight:500;color:var(--ink-3);font-size:11.5px;letter-spacing:.02em}
+.tl-row.active .tl-body{color:var(--ink)}
+.plan-cta{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+/* ===== 紀錄 ===== */
+.rec-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:4px;overflow:hidden;margin-top:20px}
+.rec-sum div{background:var(--paper-2);padding:16px 14px}
+.rec-sum dt{font-size:11.5px;color:var(--ink-3);margin:0 0 6px}
+.rec-sum dd{margin:0;font:600 24px/1.1 var(--font-mono);font-variant-numeric:tabular-nums}
+.rec-sum dd small{font:400 11px/1 var(--font-ui);color:var(--ink-2);margin-left:4px}
+.rec-list{margin-top:26px;border-top:1px solid var(--hair)}
+.rec-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--hair-soft);align-items:center}
+.rec-when{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.rec-what{font-size:14.5px;font-weight:500;margin-top:3px}
+.rec-what span{font-weight:400;color:var(--ink-2);font-size:12.5px}
+.rec-right{text-align:right}
+.rec-dur{font:500 13px/1 var(--font-mono);color:var(--ink)}
+.rec-comfort{font-size:11.5px;color:var(--ink-3);margin-top:5px}
+.empty{
+  padding:44px 0;text-align:center;color:var(--ink-3);font-size:13.5px;border-bottom:1px solid var(--hair-soft);
+}
+.empty b{display:block;color:var(--ink-2);font-weight:500;margin-bottom:6px;font-size:14px}
+
+/* ===== 設定 ===== */
+.set-group{border-top:1px solid var(--hair);margin-top:28px}
+.set-row{display:grid;grid-template-columns:1fr;gap:10px;padding:16px 0;border-bottom:1px solid var(--hair-soft)}
+.set-label{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.set-label span{font-size:14px;font-weight:500}
+.set-label output{font:500 12px/1 var(--font-mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.set-hint{font-size:12px;color:var(--ink-3);margin-top:-2px;line-height:1.6}
+input[type="range"]{
+  -webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track{height:2px;background:var(--hair)}
+input[type="range"]::-moz-range-track{height:2px;background:var(--hair)}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ink);
+  margin-top:-7px;border:0;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s;
+}
+input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ink);border:0}
+input[type="range"]:active::-webkit-slider-thumb{transform:scale(1.15)}
+.seg{
+  display:flex;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:6px;overflow:hidden;
+}
+.seg button{
+  flex:1;padding:11px 6px;background:var(--paper-2);border:0;font-size:13px;color:var(--ink-2);cursor:pointer;
+  transition:background .2s,color .2s;min-height:44px;
+}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#F1F2EC}
+.set-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.btn-quiet{
+  padding:11px 15px;background:var(--paper-2);border:1px solid var(--hair);border-radius:6px;
+  font-size:13px;color:var(--ink);cursor:pointer;min-height:44px;transition:all .2s var(--ease);
+}
+.btn-quiet:hover{border-color:var(--ink-2);transform:translateY(-1px)}
+.btn-quiet.danger{color:var(--accent-deep);border-color:rgba(195,59,46,.3)}
+
+/* ===== 安全說明 ===== */
+.safety{
+  margin-top:44px;padding:18px;border:1px solid var(--hair);border-radius:6px;background:rgba(255,255,255,.32);
+  display:grid;gap:10px;
+}
+.safety h3{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.safety h3::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);display:block}
+.safety p{margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.75}
+.foot{margin:40px 0 0;padding-top:16px;border-top:1px solid var(--hair-soft);display:flex;justify-content:space-between;gap:12px;font-size:11.5px;color:var(--ink-3);flex-wrap:wrap}
+
+/* ===== 底部導覽（手機） ===== */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:41;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding-bottom:env(safe-area-inset-bottom);
+  background:rgba(240,241,235,.92);backdrop-filter:blur(18px) saturate(130%);
+  -webkit-backdrop-filter:blur(18px) saturate(130%);
+  border-top:1px solid var(--hair);
+}
+.tabbar button{
+  display:grid;place-items:center;gap:3px;padding:9px 2px 8px;background:none;border:0;
+  font-size:11px;color:var(--ink-3);cursor:pointer;min-height:52px;transition:color .2s;
+}
+.tabbar button svg{width:19px;height:19px;opacity:.65;transition:opacity .2s}
+.tabbar button[aria-current="true"]{color:var(--ink)}
+.tabbar button[aria-current="true"] svg{opacity:1}
+
+/* ===== 訓練視窗 ===== */
+.stage{
+  position:fixed;inset:0;z-index:60;background:var(--stage);color:var(--stage-ink);
+  display:none;
+}
+.stage.open{display:block;animation:stageIn .4s var(--ease) both}
+@keyframes stageIn{from{opacity:0}to{opacity:1}}
+#field{position:absolute;inset:0;width:100%;height:100%;touch-action:manipulation}
+.stage-head{
+  position:absolute;top:0;left:0;right:0;z-index:3;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:calc(14px + env(safe-area-inset-top)) 16px 14px;
+  background:linear-gradient(to bottom,rgba(12,17,16,.9),rgba(12,17,16,0));
+}
+.stage-id{display:flex;align-items:center;gap:9px;min-width:0;flex:1 1 auto}
+.stage-id i{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+.stage-id b{font-size:14px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage-clock{font:500 12px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--stage-ink-2);flex:none}
+.stage-actions{display:flex;align-items:center;gap:8px;flex:none}
+.stage-x{
+  width:38px;height:38px;flex:none;display:grid;place-items:center;background:none;
+  border:1px solid rgba(235,237,230,.18);border-radius:50%;color:var(--stage-ink);cursor:pointer;
+}
+.stage-x svg{width:16px;height:16px}
+.stage-music{
+  position:relative;
+  width:38px;height:38px;flex:none;display:grid;place-items:center;background:none;
+  border:1px solid rgba(235,237,230,.18);border-radius:50%;color:var(--stage-ink);cursor:pointer;
+  transition:color .2s,border-color .2s,background .2s;
+}
+.stage-music svg{width:17px;height:17px}
+.stage-music.off{color:rgba(235,237,230,.34);border-color:rgba(235,237,230,.10)}
+.stage-music.off::after{
+  content:"";position:absolute;left:50%;top:50%;width:22px;height:1px;
+  background:rgba(235,237,230,.34);
+  transform:translate(-50%,-50%) rotate(-38deg);
+}
+.progress{
+  position:absolute;top:calc(72px + env(safe-area-inset-top));left:16px;right:16px;z-index:3;
+  display:flex;gap:3px;
+}
+.progress i{flex:1;height:2px;background:rgba(235,237,230,.16);border-radius:1px;overflow:hidden;position:relative}
+.progress i b{position:absolute;inset:0;transform-origin:left center;transform:scaleX(0);background:rgba(235,237,230,.85);transition:transform .12s linear}
+.progress i.done b{transform:scaleX(1)}
+.progress i.rest i{background:none}
+.stage-panel{
+  position:absolute;left:0;right:0;bottom:0;z-index:3;
+  padding:26px 16px calc(16px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,rgba(12,17,16,.94) 30%,rgba(12,17,16,.6) 70%,rgba(12,17,16,0));
+}
+.stage-prompt{
+  margin:0 0 14px;font-size:13.5px;line-height:1.6;color:var(--stage-ink-2);min-height:2.6em;
+}
+.stage-prompt b{color:var(--stage-ink);font-weight:500}
+.stage-controls{display:flex;gap:10px;align-items:center}
+.btn-stage{
+  flex:1;height:50px;border-radius:999px;border:1px solid rgba(235,237,230,.22);
+  background:rgba(235,237,230,.07);color:var(--stage-ink);font-size:14.5px;font-weight:500;
+  cursor:pointer;transition:background .2s,border-color .2s,transform .18s var(--ease);
+  min-width:0;
+}
+.btn-stage:hover{background:rgba(235,237,230,.13)}
+.btn-stage:active{transform:scale(.982)}
+.btn-stop{
+  flex:1;height:50px;border-radius:999px;border:1px solid rgba(195,59,46,.5);
+  background:transparent;color:#E9A19A;font-size:14px;cursor:pointer;
+  transition:background .2s,color .2s;
+}
+.btn-stop:hover{background:rgba(195,59,46,.14);color:#F3C8C3}
+.countdown{
+  position:absolute;inset:0;z-index:4;display:grid;place-items:center;
+  background:rgba(12,17,16,.72);backdrop-filter:blur(2px);
+  font:600 84px/1 var(--font-mono);letter-spacing:-.04em;color:var(--stage-ink);
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.countdown.show{opacity:1}
+.countdown small{
+  display:block;font:400 13px/1 var(--font-ui);letter-spacing:.06em;color:var(--stage-ink-2);
+  text-align:center;margin-top:14px;
+}
+.rest-layer{
+  position:absolute;inset:0;z-index:2;display:none;place-items:center;text-align:center;padding:24px;
+  background:radial-gradient(90% 70% at 50% 42%,rgba(37,105,91,.22),rgba(12,17,16,.94) 72%);
+}
+.rest-layer.show{display:grid}
+.rest-inner{max-width:26em}
+.rest-inner .rlabel{font:500 11px/1 var(--font-mono);letter-spacing:.14em;color:#7FB0A4}
+.rest-inner h3{margin:14px 0 10px;font-size:24px;font-weight:600;letter-spacing:-.02em;color:var(--stage-ink)}
+.rest-inner p{margin:0;font-size:13.5px;line-height:1.8;color:var(--stage-ink-2)}
+.rest-ring{
+  width:104px;height:104px;margin:24px auto 0;border-radius:50%;border:1px solid rgba(235,237,230,.14);
+  position:relative;display:grid;place-items:center;
+}
+.rest-ring::after{
+  content:"";position:absolute;inset:-1px;border-radius:50%;border:1px solid rgba(127,176,164,.5);
+  clip-path:inset(0 0 0 0);transform:scale(.9);opacity:0;
+}
+.rest-ring span{font:500 30px/1 var(--font-mono);color:#CFE0DA;font-variant-numeric:tabular-nums}
+.task-hud{
+  position:absolute;right:16px;top:calc(94px + env(safe-area-inset-top));z-index:3;
+  text-align:right;font:500 12px/1.7 var(--font-mono);color:var(--stage-ink-2);font-variant-numeric:tabular-nums;
+}
+.task-hud b{color:var(--stage-ink);font-weight:600}
+
+/* ===== 報告 / 對話面板 ===== */
+.sheet{
+  position:fixed;inset:0;z-index:70;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(10,14,13,.52);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  padding:0;
+}
+.sheet.open{display:flex;animation:sheetIn .35s var(--ease) both}
+@keyframes sheetIn{from{opacity:0}to{opacity:1}}
+.sheet-inner{
+  width:100%;max-width:540px;max-height:90vh;overflow:auto;
+  background:var(--paper-2);border-radius:16px 16px 0 0;
+  padding:22px 20px calc(20px + env(safe-area-inset-bottom));
+  box-shadow:0 -20px 50px -20px rgba(0,0,0,.5);
+  animation:sheetUp .45s var(--ease) both;
+}
+@keyframes sheetUp{from{transform:translateY(26px)}to{transform:none}}
+.sheet-grip{width:34px;height:3px;border-radius:2px;background:var(--hair);margin:-4px auto 16px}
+.sheet-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px}
+.sheet-title h2{margin:0;font-size:19px;letter-spacing:-.02em;font-weight:600}
+.sheet-title span{font:500 11px/1 var(--font-mono);color:var(--ink-3);letter-spacing:.05em}
+.sheet-sub{margin:2px 0 18px;font-size:12.5px;color:var(--ink-2)}
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:4px;overflow:hidden}
+.rep-cell{background:var(--paper-2);padding:13px 12px}
+.rep-cell label{display:block;font-size:11px;color:var(--ink-3);margin-bottom:5px;letter-spacing:.02em}
+.rep-cell strong{font:600 20px/1.25 var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.rep-cell strong small{font:400 11px/1 var(--font-ui);color:var(--ink-2);margin-left:4px}
+.rep-note{margin:16px 0 0;padding:12px 13px;border-left:2px solid var(--rest);background:rgba(37,105,91,.06);font-size:12.5px;line-height:1.7;color:var(--ink-2)}
+.comfort{margin-top:18px}
+.comfort p{margin:0 0 9px;font-size:12.5px;color:var(--ink-2)}
+.comfort-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.comfort-opts button{
+  padding:10px 4px;background:var(--paper);border:1px solid var(--hair);border-radius:5px;
+  font-size:12.5px;color:var(--ink-2);cursor:pointer;min-height:44px;transition:all .18s var(--ease);
+}
+.comfort-opts button:hover{border-color:var(--ink-3)}
+.comfort-opts button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F1F2EC}
+.comfort-opts button[data-v="bad"][aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.sheet-actions{display:flex;gap:10px;margin-top:20px}
+.sheet-actions .btn-primary{flex:1;justify-content:center;height:52px;font-size:15px}
+.sheet-actions .btn-quiet{height:52px}
+
+/* 訓練前檢查 */
+.check-list{display:grid;gap:10px;margin:4px 0 18px}
+.check-list div{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;font-size:13px;color:var(--ink-2);line-height:1.6}
+.check-list i{
+  width:16px;height:16px;border:1px solid var(--hair);border-radius:50%;margin-top:3px;
+  display:grid;place-items:center;color:var(--rest);font-size:10px;
+}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed;left:50%;bottom:78px;transform:translate(-50%,14px);z-index:90;
+  background:var(--ink);color:#EDEEE8;padding:11px 16px;border-radius:999px;font-size:13px;
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .3s var(--ease);white-space:nowrap;
+  box-shadow:0 12px 30px -14px rgba(0,0,0,.6);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ===== 斷點 ===== */
+@media (min-width:640px){
+  .page{padding:0 28px 110px}
+  .top{padding:0 28px;height:64px}
+  .hero{gap:34px}
+  .viewer{aspect-ratio:16/9}
+  .facts div{padding:18px 4px}
+  .mod-row{grid-template-columns:64px 1fr 26px;padding:15px 0}
+  .mod-thumb{width:64px;height:42px}
+  .set-row{grid-template-columns:200px 1fr;align-items:center;gap:24px}
+  .set-row .set-hint{grid-column:2}
+  .sheet{align-items:center;padding:24px}
+  .sheet-inner{border-radius:14px;padding:26px 28px 24px}
+  .sheet-grip{display:none}
+}
+@media (min-width:900px){
+  .nav{display:flex}
+  .streak{display:flex}
+  .tabbar{display:none}
+  .hero{grid-template-columns:1.02fr .98fr;align-items:center;padding:56px 0 20px;gap:48px}
+  .lede{font-size:16px}
+  .facts{margin-top:38px}
+  .section{margin-top:64px}
+  .timeline{--rail:34px}
+  .tl-row{padding-bottom:30px}
+  .page{padding-bottom:64px}
+  .toast{bottom:34px}
+  h1{font-size:clamp(48px,4.6vw,68px)}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <ellipse cx="12" cy="12" rx="10.5" ry="6" stroke="currentColor" stroke-width="1.4"/>
+      <circle cx="12" cy="12" r="2.6" fill="#C33B2E"/>
+    </svg>
+    <b>EyeMotion</b>
+  </div>
+  <nav class="nav" aria-label="主要導覽">
+    <button data-go="home" aria-current="true">首頁</button>
+    <button data-go="library">訓練模組</button>
+    <button data-go="plan">四週計畫</button>
+    <button data-go="records">訓練紀錄</button>
+  </nav>
+  <div class="top-right">
+    <span class="streak"><i></i><span id="streakText">尚未開始</span></span>
+    <button class="icon-btn" data-go="settings" aria-label="設定">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M12 2.8v2.2M12 19v2.2M2.8 12h2.2M19 12h2.2M5.5 5.5l1.6 1.6M16.9 16.9l1.6 1.6M18.5 5.5l-1.6 1.6M7.1 16.9L5.5 18.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ===== 視圖：首頁 ===== -->
+  <section class="view" data-view="home">
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="kicker">第 <span id="heroWeek">1</span> 週 · 四週入門課程</div>
+        <h1>讓視線<br><span>慢下來。</span></h1>
+        <p class="lede">跟著光點移動視線，讓眼睛從近距離的緊繃裡退出來。短時、可暫停、可調整，任何時候都能停。</p>
+        <div class="hero-actions">
+          <button class="btn-primary" id="btnStart">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6.5l8 5.5-8 5.5z" fill="currentColor"/></svg>
+            開始課程 <span class="len" id="startLen">5 分</span>
+          </button>
+          <button class="btn-text" data-go="library">自選模組</button>
+        </div>
+        <div class="len-inline">
+          <label for="homeLen">課程長度</label>
+          <input type="range" id="homeLen" min="3" max="5" step="1" value="5" aria-label="課程長度（分鐘）">
+          <output id="homeLenOut">5 分</output>
+        </div>
+        <dl class="facts">
+          <div><dt>本週完成</dt><dd><span id="factWeek">0</span><small>次</small></dd></div>
+          <div><dt>連續規律</dt><dd><span id="factStreak">0</span><small>天</small></dd></div>
+          <div><dt>平均時長</dt><dd><span id="factAvg">0</span><small>分</small></dd></div>
+        </dl>
+      </div>
+      <div class="viewer">
+        <canvas id="heroCanvas" aria-hidden="true"></canvas>
+        <div class="viewer-cap"><span>水平追蹤 · 慢速示範</span><span id="viewerTime" class="tnum">00:00</span></div>
+      </div>
+    </div>
+
+    <section class="week-strip">
+      <div class="strip-head">
+        <h2>四週訓練量</h2>
+        <span class="sub" id="stripSub">每次建議 3–5 分鐘</span>
+      </div>
+      <div class="tick-chart" id="tickChart" aria-label="四週訓練次數"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>訓練模組</h2>
+          <p>每個模組都能單獨開始。追蹤類由運動引擎生成軌跡，注視與休息類更短、更安靜。</p>
+        </div>
+      </div>
+
+      <div class="group-label">追蹤掃視</div>
+      <div class="mod-list">
+        <button class="mod-row" data-ex="horizontal">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><line x1="5" y1="13" x2="39" y2="13" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="3.2" fill="#C33B2E"/><path d="M7 9.5l-3 3.5 3 3.5M37 9.5l3 3.5-3 3.5" stroke="#5C635D" stroke-width="1" fill="none" stroke-linecap="round"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">水平追蹤 <em class="mod-tag">左右往返</em></span>
+            <span class="mod-desc">眼球在水平方向連續跟隨單一光點，建立低速穩定的掃視節奏。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+        <button class="mod-row" data-ex="vertical">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><line x1="22" y1="4" x2="22" y2="22" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="3.2" fill="#C33B2E"/><path d="M18.5 6.5L22 3.5l3.5 3M18.5 19.5L22 22.5l3.5-3" stroke="#5C635D" stroke-width="1" fill="none" stroke-linecap="round"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">垂直追蹤 <em class="mod-tag">上下往返</em></span>
+            <span class="mod-desc">視線沿垂直方向往返，練習上下方向的平滑跟隨。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+        <button class="mod-row" data-ex="diagonal">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><line x1="7" y1="5" x2="37" y2="21" stroke="#9AA099" stroke-width="1"/><line x1="37" y1="5" x2="7" y2="21" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="3.2" fill="#C33B2E"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">斜向交叉 <em class="mod-tag">兩條對角線</em></span>
+            <span class="mod-desc">光點沿兩條對角線往返，訓練斜向路徑的協調移動。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+        <button class="mod-row" data-ex="circle">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><circle cx="22" cy="13" r="9" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="31" cy="13" r="3.2" fill="#C33B2E"/><circle cx="22" cy="13" r="1" fill="#5C635D"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">圓形追蹤 <em class="mod-tag">順 / 逆時針</em></span>
+            <span class="mod-desc">沿圓周連續移動，讓眼球在沒有折返點的軌跡上保持穩定。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+        <button class="mod-row" data-ex="zigzag">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><polyline points="5,20 13,6 21,20 29,6 37,20" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="13" cy="6" r="3.2" fill="#C33B2E"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">折線路徑 <em class="mod-tag">多節點</em></span>
+            <span class="mod-desc">光點在多個節點間折返，練習方向切換時的視線定位。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+      </div>
+
+      <div class="group-label">注視與辨識</div>
+      <div class="mod-list">
+        <button class="mod-row" data-ex="fixation">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><circle cx="22" cy="13" r="7.5" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="2.8" fill="#C33B2E"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">定點注視 <em class="mod-tag">固定目標</em></span>
+            <span class="mod-desc">視線停在固定光點上，目標周圍以極慢節奏呼吸，不閃爍。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+        <button class="mod-row" data-ex="recognize">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><circle cx="9" cy="8" r="1.6" fill="#9AA099"/><circle cx="17" cy="5.5" r="1.6" fill="#9AA099"/><circle cx="35" cy="8" r="1.6" fill="#9AA099"/><circle cx="31" cy="19" r="1.6" fill="#9AA099"/><circle cx="14" cy="19.5" r="1.6" fill="#9AA099"/><circle cx="24" cy="13" r="3" fill="#C33B2E"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">目標辨識 <em class="mod-tag task">專注任務</em></span>
+            <span class="mod-desc">在一組灰點中找出硃紅目標並點選，只記錄任務進度，不評價視力。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+      </div>
+
+      <div class="group-label">休息與恢復</div>
+      <div class="mod-list">
+        <button class="mod-row" data-ex="nearfar">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><path d="M4 21h36" stroke="#9AA099" stroke-width="1"/><circle cx="12" cy="17" r="3" fill="#9AA099"/><path d="M16 17l10-7" stroke="#9AA099" stroke-width="1" stroke-dasharray="2 3"/><path d="M24 8.5l4 1M24 8.5l1 4" stroke="#5C635D" stroke-width="1" fill="none"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">遠近休息 <em class="mod-tag">看真實遠處</em></span>
+            <span class="mod-desc">視線離開螢幕，看向真實遠方。螢幕內不模擬對焦，只用倒數提示。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+        <button class="mod-row" data-ex="blink">
+          <span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true"><path d="M7 13q15-10 30 0q-15 10-30 0z" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="2.6" fill="#25695B"/></svg></span>
+          <span class="mod-main">
+            <span class="mod-name">眨眼休息 <em class="mod-tag">自然眨眼</em></span>
+            <span class="mod-desc">以極慢節奏提示自然眨眼，不要求用力擠眼、不強制凝視。</span>
+          </span>
+          <span class="mod-arrow">›</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="safety">
+      <h3>使用邊界</h3>
+      <p>本工具是一般視覺休息與互動練習，不用於診斷、治療或矯正近視、散光、斜視等眼部疾病。訓練記錄只反映完成行為與主觀舒適度，不代表視力或眼肌功能改善。</p>
+      <p>出現眼痛、頭暈、複視或明顯不適請立即停止；持續或突發的視覺異常請尋求眼科評估。</p>
+    </section>
+    <div class="foot">
+      <span>EyeMotion · V1.0 · Web First</span>
+      <span>非醫療診斷或治療方案</span>
+    </div>
+  </section>
+
+  <!-- ===== 視圖：訓練模組 ===== -->
+  <section class="view" data-view="library" hidden>
+    <div class="hero-copy" style="padding-top:0">
+      <div class="kicker">單獨練習</div>
+      <h1 style="font-size:clamp(30px,7.4vw,46px);margin-top:14px">選一個動作，<br><span>做一兩分鐘。</span></h1>
+      <p class="lede">不確定從哪開始，就選水平追蹤或眨眼休息。每個模組都會自動安排收尾休息。</p>
+    </div>
+    <div id="libraryList" style="margin-top:10px"></div>
+    <section class="safety">
+      <h3>單模組練習的節奏</h3>
+      <p>單一模組建議 60–150 秒，練完接 30 秒眨眼或遠望。同一天不必把所有模組都做一輪，疲倦時縮短或跳過都可以。</p>
+    </section>
+  </section>
+
+  <!-- ===== 視圖：四週計畫 ===== -->
+  <section class="view" data-view="plan" hidden>
+    <div class="hero-copy" style="padding-top:0">
+      <div class="kicker">四週入門課程</div>
+      <h1 style="font-size:clamp(30px,7.4vw,46px);margin-top:14px">每週三到四次，<br><span>每次三到五分鐘。</span></h1>
+      <p class="lede">這是產品內建的示範課程，用來驗證課程編排、時間控制與反饋流程。不是臨床療程，也不保證改善視力。</p>
+    </div>
+
+    <div class="plan-meta">
+      <div class="week-chips" id="weekChips" aria-label="目前週次">
+        <button class="chip" data-week="1" aria-pressed="true">第 1 週</button>
+        <button class="chip" data-week="2" aria-pressed="false">第 2 週</button>
+        <button class="chip" data-week="3" aria-pressed="false">第 3 週</button>
+        <button class="chip" data-week="4" aria-pressed="false">第 4 週</button>
+      </div>
+      <button class="btn-text" id="planStart">用本週課表開始</button>
+    </div>
+
+    <div class="timeline" id="timeline">
+      <div class="tl-row" data-w="1">
+        <div class="tl-rail"><span class="tl-dot"></span></div>
+        <div class="tl-card">
+          <div class="tl-top"><span class="tl-week">W01</span><span class="tl-title">熟悉期</span><span class="tl-badge" hidden>本週</span></div>
+          <div class="tl-body">
+            <div><b>階段目標</b><span>認識動作與操作，建立舒適度基線。</span></div>
+            <div><b>建議安排</b><span>每次約 3–5 分鐘，每週 3–4 次。以定點注視、慢速水平／垂直追蹤及眨眼休息為主。</span></div>
+            <div><b>階段驗收</b><span>能獨立開始、暫停、結束，並記錄舒適度反饋。</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-row" data-w="2">
+        <div class="tl-rail"><span class="tl-dot"></span></div>
+        <div class="tl-card">
+          <div class="tl-top"><span class="tl-week">W02</span><span class="tl-title">基礎期</span><span class="tl-badge" hidden>本週</span></div>
+          <div class="tl-body">
+            <div><b>階段目標</b><span>熟悉不同方向的路径。</span></div>
+            <div><b>建議安排</b><span>每次約 3–5 分鐘，每週 3–4 次。加入斜向與圓形，動作之間安排短休息。</span></div>
+            <div><b>階段驗收</b><span>能完成不同軌跡，過程中無明顯不適。</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-row" data-w="3">
+        <div class="tl-rail"><span class="tl-dot"></span></div>
+        <div class="tl-card">
+          <div class="tl-top"><span class="tl-week">W03</span><span class="tl-title">組合期</span><span class="tl-badge" hidden>本週</span></div>
+          <div class="tl-body">
+            <div><b>階段目標</b><span>理解任務切換與視覺注意任務。</span></div>
+            <div><b>建議安排</b><span>每次約 3–5 分鐘，每週 3–4 次。組合追蹤、目標辨識與休息模組。</span></div>
+            <div><b>階段驗收</b><span>能完成一套組合課程，並記錄任務完成率。</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-row" data-w="4">
+        <div class="tl-rail"><span class="tl-dot"></span></div>
+        <div class="tl-card">
+          <div class="tl-top"><span class="tl-week">W04</span><span class="tl-title">自主期</span><span class="tl-badge" hidden>本週</span></div>
+          <div class="tl-body">
+            <div><b>階段目標</b><span>選擇舒適的個人訓練組合。</span></div>
+            <div><b>建議安排</b><span>每次約 3–5 分鐘，每週 3–4 次。可自選模組，不以加快速度或延長時間作為進步標準。</span></div>
+            <div><b>階段驗收</b><span>能選擇課程、查看記錄，並依舒適度調整。</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="safety">
+      <h3>課程結構</h3>
+      <p>開始與檢查約 30 秒 → 基礎動作 1–2 分鐘 → 組合任務 1–2 分鐘 → 休息 1–2 分鐘 → 反饋記錄約 30 秒。總長可在首頁或設定頁調成 3–5 分鐘，動作之間會自動插入 20 秒上下的短休息。</p>
+    </section>
+  </section>
+
+  <!-- ===== 視圖：訓練紀錄 ===== -->
+  <section class="view" data-view="records" hidden>
+    <div class="hero-copy" style="padding-top:0">
+      <div class="kicker">訓練紀錄</div>
+      <h1 style="font-size:clamp(30px,7.4vw,46px);margin-top:14px">只看完成與感受，<br><span>不看分數。</span></h1>
+      <p class="lede">記錄留在這台裝置上，不上傳。可隨時匯出備份或清除。</p>
+    </div>
+
+    <dl class="rec-sum">
+      <div><dt>總次數</dt><dd><span id="sumCount">0</span><small>次</small></dd></div>
+      <div><dt>總時長</dt><dd><span id="sumMin">0</span><small>分</small></dd></div>
+      <div><dt>本週次數</dt><dd><span id="sumWeek">0</span><small>次</small></dd></div>
+    </dl>
+
+    <div class="section" style="margin-top:34px">
+      <div class="strip-head"><h2>最近訓練</h2><span class="sub" id="recCount"></span></div>
+      <div class="rec-list" id="recList"></div>
+    </div>
+  </section>
+
+  <!-- ===== 視圖：設定 ===== -->
+  <section class="view" data-view="settings" hidden>
+    <div class="hero-copy" style="padding-top:0">
+      <div class="kicker">設定</div>
+      <h1 style="font-size:clamp(30px,7.4vw,46px);margin-top:14px">訓練參數</h1>
+      <p class="lede">速度與目標尺寸按你的舒適度調整。系統設有上限，避免過快或過小。</p>
+    </div>
+
+    <div class="set-group">
+      <div class="set-row">
+        <div class="set-label"><span>移動速度</span><output id="outSpeed">慢</output></div>
+        <input type="range" id="setSpeed" min="0.6" max="1.6" step="0.1" value="1" aria-label="移動速度">
+        <p class="set-hint">速度以「每秒走過多少視窗寬度」計算，不受螢幕刷新率影響。上限已限制在舒適範圍。</p>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><span>目標尺寸</span><output id="outSize">18 px</output></div>
+        <input type="range" id="setSize" min="12" max="34" step="1" value="18" aria-label="目標尺寸">
+        <p class="set-hint">目標越小越需要精細注視。覺得吃力就調大，不必勉強。</p>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><span>課程長度</span><output id="outLen">5 分鐘</output></div>
+        <input type="range" id="setLen" min="3" max="5" step="1" value="5" aria-label="課程長度（分鐘）">
+        <p class="set-hint">可調 3–5 分鐘，首頁也能直接拖動。實際時間會隨模組略長或略短。</p>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><span>輕音樂</span><output id="outMusic">開啟</output></div>
+        <div class="seg" id="setMusic" role="group" aria-label="輕音樂">
+          <button data-music="1" aria-pressed="true">開啟</button>
+          <button data-music="0" aria-pressed="false">關閉</button>
+        </div>
+        <p class="set-hint">本機音檔：Satie《Gymnopédie No.1》，Kevin MacLeod 演奏（CC BY 3.0）。開始訓練時淡入，訓練視窗右上角可即時關閉。</p>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><span>提示音</span><output id="outSound">關閉</output></div>
+        <div class="seg" id="setSound" role="group" aria-label="提示音">
+          <button data-sound="0" aria-pressed="true">關閉</button>
+          <button data-sound="1" aria-pressed="false">開啟</button>
+        </div>
+        <p class="set-hint">僅在段落切換時發出一聲極短的柔音，不自動播放任何聲音。</p>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><span>減少動態</span><output id="outMotion">跟隨系統</output></div>
+        <div class="seg" id="setMotion" role="group" aria-label="減少動態">
+          <button data-motion="auto" aria-pressed="true">跟隨系統</button>
+          <button data-motion="on" aria-pressed="false">減少</button>
+        </div>
+        <p class="set-hint">減少動態會停用示範視窗的循環動畫與過場，保留完整操作。</p>
+      </div>
+    </div>
+
+    <div class="set-actions">
+      <button class="btn-quiet" id="btnPwa">離線與安裝</button>
+      <button class="btn-quiet" id="btnExport">匯出資料（JSON）</button>
+      <button class="btn-quiet danger" id="btnClear">清除本機資料</button>
+    </div>
+
+    <section class="safety">
+      <h3>裝置與隱私</h3>
+      <p>資料以本機儲存保存，不需要帳號、不上傳伺服器。V1.0 不啟用攝影機，也不產生眼動軌跡或「眼動準確率」等指標。</p>
+      <p>本工具不提供醫療建議。若你正在接受眼科治療，請依醫師指示安排休息與用眼時間。</p>
+    </section>
+  </section>
+
+</main>
+
+<nav class="tabbar" aria-label="底部導覽">
+  <button data-go="home" aria-current="true">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V20H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    首頁
+  </button>
+  <button data-go="library">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.5"/></svg>
+    模組
+  </button>
+  <button data-go="plan">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5.5" width="16" height="15" rx="1.6" stroke="currentColor" stroke-width="1.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" stroke="currentColor" stroke-width="1.5"/></svg>
+    計畫
+  </button>
+  <button data-go="records">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" stroke-width="1.5"/></svg>
+    紀錄
+  </button>
+</nav>
+
+<!-- ===== 訓練視窗 ===== -->
+<div class="stage" id="stage" role="dialog" aria-modal="true" aria-label="訓練視窗">
+  <canvas id="field"></canvas>
+
+  <div class="stage-head">
+    <div class="stage-id"><i></i><b id="stageName">水平追蹤</b></div>
+    <div class="stage-clock"><span id="stageClock">00:00</span> / <span id="stageTotal">05:00</span></div>
+    <div class="stage-actions">
+      <button class="stage-music" id="btnMusic" aria-label="輕音樂開關" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9 17.5V7.2l8-2v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="6.8" cy="17.6" r="2.3" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="14.8" cy="15.3" r="2.3" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+      <button class="stage-x" id="stageClose" aria-label="關閉訓練">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="progress" id="stageProgress"></div>
+  <div class="task-hud" id="taskHud" hidden></div>
+
+  <div class="rest-layer" id="restLayer">
+    <div class="rest-inner">
+      <div class="rlabel" id="restLabel">休息</div>
+      <h3 id="restTitle">把視線移開螢幕</h3>
+      <p id="restText">看向窗外或房間最遠處，讓眼睛放鬆。倒數結束會自動繼續。</p>
+      <div class="rest-ring"><span id="restCount">60</span></div>
+    </div>
+  </div>
+
+  <div class="stage-panel">
+    <p class="stage-prompt" id="stagePrompt"></p>
+    <div class="stage-controls">
+      <button class="btn-stage" id="btnPause">暫停</button>
+      <button class="btn-stop" id="btnStop">不舒服，停止</button>
+    </div>
+  </div>
+
+  <div class="countdown" id="countdown"><div id="countNum">3</div><small>調整坐姿，視線放鬆</small></div>
+</div>
+
+<!-- ===== 對話面板 ===== -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="面板">
+  <div class="sheet-inner">
+    <div class="sheet-grip"></div>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<audio id="bgm" loop preload="auto" playsinline src="assets/light-piano.mp3"></audio>
+
+<script>
+/* ============================================================
+   EyeMotion V1.0 — 訓練引擎
+   分層：EX 定義 → 路徑 / 繪製 → 課程與狀態機 → 資料與視圖
+   位置一律由「經過時間 × 速度」計算，不依賴每幀位移，
+   因此不同刷新率的裝置速度一致。
+   ============================================================ */
+(function(){
+'use strict';
+
+var $ = function(s, r){ return (r || document).querySelector(s); };
+var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+var KEY = 'eyemotion.v1';
+var DAY = 86400000;
+
+/* ---------- 模組定義 ---------- */
+var EX = {
+  horizontal: {
+    name: '水平追蹤', kind: 'track', tag: '左右往返', weight: 1,
+    desc: '眼球在水平方向連續跟隨單一光點，建立低速穩定的掃視節奏。',
+    prompt: '跟著光點左右移動視線，<b>頭部保持不動</b>。覺得跟不上就減速。'
+  },
+  vertical: {
+    name: '垂直追蹤', kind: 'track', tag: '上下往返', weight: 1,
+    desc: '視線沿垂直方向往返，練習上下方向的平滑跟隨。',
+    prompt: '視線隨光點上下移動，<b>肩膀放鬆</b>，不要抬高下巴。'
+  },
+  diagonal: {
+    name: '斜向交叉', kind: 'track', tag: '兩條對角線', weight: 1.05,
+    desc: '光點沿兩條對角線往返，訓練斜向路徑的協調移動。',
+    prompt: '光點會沿兩條對角線往復，<b>用眼睛帶動</b>，不要轉動整顆頭。'
+  },
+  circle: {
+    name: '圓形追蹤', kind: 'track', tag: '順 / 逆時針', weight: 1.1,
+    desc: '沿圓周連續移動，讓眼球在沒有折返點的軌跡上保持穩定。',
+    prompt: '沿著圓周跟隨，<b>速度放慢</b>，讓眼球滑順地畫圓。'
+  },
+  zigzag: {
+    name: '折線路徑', kind: 'track', tag: '多節點', weight: 1.05,
+    desc: '光點在多個節點間折返，練習方向切換時的視線定位。',
+    prompt: '光點會在多個節點折返，<b>到轉角時稍作停留</b>再跟上。'
+  },
+  fixation: {
+    name: '定點注視', kind: 'focus', tag: '固定目標', weight: .85,
+    desc: '視線停在固定光點上，目標周圍以極慢節奏呼吸，不閃爍。',
+    prompt: '視線停在中央光點，<b>用柔和的注視</b>，不是用力瞪。周圍光圈只是呼吸提示。'
+  },
+  recognize: {
+    name: '目標辨識', kind: 'task', tag: '專注任務', weight: .9, task: true,
+    desc: '在一組灰點中找出硃紅目標並點選，只記錄任務進度，不評價視力。',
+    prompt: '找出<b>硃紅色</b>的目標並點一下。點錯沒有關係，會直接換下一個。'
+  },
+  nearfar: {
+    name: '遠近休息', kind: 'rest', sub: 'nearfar', tag: '看真實遠處', weight: .6,
+    desc: '視線離開螢幕，看向真實遠方。螢幕內不模擬對焦，只用倒數提示。',
+    prompt: '把視線離開螢幕，看向窗外或房間最遠處。'
+  },
+  blink: {
+    name: '眨眼休息', kind: 'rest', sub: 'blink', tag: '自然眨眼', weight: .55,
+    desc: '以極慢節奏提示自然眨眼，不要求用力擠眼、不強制凝視。',
+    prompt: '自然眨眼就好，<b>不要用力擠眼</b>。'
+  }
+};
+
+var WEEK_SETS = {
+  1: ['fixation', 'horizontal', 'blink'],
+  2: ['horizontal', 'diagonal', 'circle', 'blink'],
+  3: ['horizontal', 'diagonal', 'recognize', 'nearfar'],
+  4: ['zigzag', 'circle', 'recognize', 'blink']
+};
+
+/* ---------- 資料層 ---------- */
+var DEFAULTS = {
+  settings: { speed: 1, size: 18, len: 5, sound: false, music: true, motion: 'auto' },
+  week: 1,
+  sessions: []
+};
+
+function loadDB(){
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    var o = JSON.parse(raw);
+    if (!o || typeof o !== 'object') return null;
+    return o;
+  } catch (e) { return null; }
+}
+function saveDB(){
+  try { localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch (e) { toast('這台裝置無法寫入儲存空間'); }
+}
+var DB = loadDB() || {};
+DB.settings = Object.assign({}, DEFAULTS.settings, DB.settings || {});
+DB.settings.len = Math.min(5, Math.max(3, parseInt(DB.settings.len, 10) || 5));
+DB.week = Math.min(4, Math.max(1, parseInt(DB.week, 10) || 1));
+DB.sessions = Array.isArray(DB.sessions) ? DB.sessions : [];
+
+/* ---------- 工具 ---------- */
+function pad(n){ return n < 10 ? '0' + n : '' + n; }
+function mmss(sec){
+  sec = Math.max(0, Math.round(sec));
+  return pad(Math.floor(sec / 60)) + ':' + pad(sec % 60);
+}
+function dayKey(d){
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function today(){ return new Date(); }
+function startOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
+function humanDay(d){
+  var t = startOfDay(today()).getTime();
+  var x = startOfDay(d).getTime();
+  var diff = Math.round((t - x) / DAY);
+  if (diff <= 0) return '今天';
+  if (diff === 1) return '昨天';
+  if (diff < 7) return diff + ' 天前';
+  return (d.getMonth() + 1) + '/' + d.getDate();
+}
+function toast(msg){
+  var el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ el.classList.remove('show'); }, 2300);
+}
+var reduceMotion = function(){
+  var s = DB.settings.motion;
+  if (s === 'on') return true;
+  if (s === 'auto') return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return false;
+};
+
+/* 由第一次訓練起算週次；沒有紀錄時以今天為第 1 週起點 */
+function planStart(){
+  if (!DB.sessions.length) return startOfDay(today());
+  var first = DB.sessions.reduce(function(a, b){ return a.at < b.at ? a : b; });
+  return startOfDay(new Date(first.at));
+}
+function weekOf(d){
+  var diff = Math.floor((startOfDay(d).getTime() - planStart().getTime()) / DAY);
+  return Math.min(4, Math.max(1, Math.floor(diff / 7) + 1));
+}
+function currentWeek(){
+  var auto = weekOf(today());
+  return Math.max(auto, DB.week);
+}
+function weekCount(w){
+  var st = planStart();
+  var from = st.getTime() + (w - 1) * 7 * DAY;
+  var to = from + 7 * DAY;
+  return DB.sessions.filter(function(s){
+    var t = new Date(s.at).getTime();
+    return t >= from && t < to;
+  }).length;
+}
+function streakDays(){
+  var keys = {};
+  DB.sessions.forEach(function(s){ keys[dayKey(new Date(s.at))] = 1; });
+  var n = 0, d = startOfDay(today());
+  if (!keys[dayKey(d)]) d = new Date(d.getTime() - DAY);
+  while (keys[dayKey(d)]) { n++; d = new Date(d.getTime() - DAY); }
+  return n;
+}
+
+/* ---------- 路徑 ---------- */
+var PATHS = {
+  horizontal: { pts: [[.12,.5],[.88,.5]], loop: false },
+  vertical:   { pts: [[.5,.13],[.5,.87]], loop: false },
+  diagonal:   { pts: [[.12,.16],[.5,.5],[.88,.84],[.5,.5],[.88,.16],[.5,.5],[.12,.84],[.5,.5]], loop: true },
+  zigzag:     { pts: [[.1,.78],[.3,.2],[.5,.78],[.7,.2],[.9,.78]], loop: false }
+};
+
+function buildPath(id, box){
+  var bx = box.x, by = box.y, bw = box.w, bh = box.h;
+  if (id === 'circle') {
+    var r = Math.min(bw, bh) * 0.37;
+    var cx = bx + bw / 2, cy = by + bh / 2;
+    var total = 2 * Math.PI * r;
+    return {
+      loop: true, total: total,
+      at: function(s){
+        var a = s / r - Math.PI / 2;
+        return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+      }
+    };
+  }
+  var def = PATHS[id] || PATHS.horizontal;
+  var pts = def.pts.map(function(p){ return [bx + p[0] * bw, by + p[1] * bh]; });
+  var segs = [], total = 0;
+  for (var k = 1; k < pts.length; k++) {
+    var a = pts[k - 1], b = pts[k];
+    var len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    segs.push({ a: a, b: b, len: len, start: total });
+    total += len;
+  }
+  return {
+    loop: def.loop, total: total,
+    at: function(s){
+      if (total <= 0) return pts[0];
+      if (this.loop) { s = ((s % total) + total) % total; }
+      else {
+        var period = total * 2;
+        s = ((s % period) + period) % period;
+        if (s > total) s = period - s;
+      }
+      for (var i = 0; i < segs.length; i++) {
+        var sg = segs[i];
+        if (s <= sg.start + sg.len || i === segs.length - 1) {
+          var u = sg.len > 0 ? (s - sg.start) / sg.len : 0;
+          u = Math.min(1, Math.max(0, u));
+          return [sg.a[0] + (sg.b[0] - sg.a[0]) * u, sg.a[1] + (sg.b[1] - sg.a[1]) * u];
+        }
+      }
+      return pts[0];
+    }
+  };
+}
+
+/* 有效訓練區域：扣掉頂部資訊列與底部操作列，光點不會被遮住 */
+function fieldBox(){
+  var top = FH < 560 ? 56 : 96;
+  var bottom = FH < 560 ? 96 : 196;
+  var side = Math.max(20, FW * 0.06);
+  var h = FH - top - bottom;
+  if (h < 150) {
+    top = Math.max(44, FH * 0.12);
+    bottom = Math.max(56, FH * 0.12);
+    h = FH - top - bottom;
+  }
+  return { x: side, y: top, w: Math.max(80, FW - side * 2), h: Math.max(80, h) };
+}
+
+/* ---------- 繪製基礎 ---------- */
+var canvasDPR = function(cv){
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  var w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return { w: 0, h: 0, dpr: dpr };
+  cv.width = Math.round(w * dpr);
+  cv.height = Math.round(h * dpr);
+  return { w: w, h: h, dpr: dpr };
+};
+
+function paintBackdrop(ctx, W, H){
+  var g = ctx.createRadialGradient(W / 2, H * 0.44, 0, W / 2, H * 0.44, Math.max(W, H) * 0.85);
+  g.addColorStop(0, '#141B19');
+  g.addColorStop(0.55, '#0F1514');
+  g.addColorStop(1, '#0A0E0D');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function paintGuides(ctx, box){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(235,237,230,.10)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(box.x + .5, box.y + .5, box.w - 1, box.h - 1);
+  // 四角刻度
+  ctx.strokeStyle = 'rgba(235,237,230,.28)';
+  var t = 9;
+  var corners = [
+    [box.x, box.y, 1, 1], [box.x + box.w, box.y, -1, 1],
+    [box.x, box.y + box.h, 1, -1], [box.x + box.w, box.y + box.h, -1, -1]
+  ];
+  corners.forEach(function(c){
+    ctx.beginPath();
+    ctx.moveTo(c[0] + c[2] * t, c[1]);
+    ctx.lineTo(c[0], c[1]);
+    ctx.lineTo(c[0], c[1] + c[3] * t);
+    ctx.stroke();
+  });
+  // 中央十字（極淡）
+  var cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+  ctx.strokeStyle = 'rgba(235,237,230,.06)';
+  ctx.beginPath();
+  ctx.moveTo(cx - 7, cy); ctx.lineTo(cx + 7, cy);
+  ctx.moveTo(cx, cy - 7); ctx.lineTo(cx, cy + 7);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function paintTarget(ctx, x, y, r, softness){
+  var halo = r * 3.4;
+  var g = ctx.createRadialGradient(x, y, r * 0.3, x, y, halo);
+  g.addColorStop(0, 'rgba(214,72,58,.34)');
+  g.addColorStop(0.45, 'rgba(200,58,44,.12)');
+  g.addColorStop(1, 'rgba(200,58,44,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(x, y, halo, 0, 6.2832); ctx.fill();
+
+  ctx.fillStyle = '#D3453A';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+
+  var core = ctx.createRadialGradient(x - r * 0.25, y - r * 0.3, 0, x, y, r);
+  core.addColorStop(0, 'rgba(255,228,220,.85)');
+  core.addColorStop(0.5, 'rgba(240,120,100,.25)');
+  core.addColorStop(1, 'rgba(200,50,40,0)');
+  ctx.fillStyle = core;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+}
+
+/* ============================================================
+   首頁示範視窗
+   ============================================================ */
+(function heroDemo(){
+  var cv = $('#heroCanvas');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var W = 0, H = 0, dpr = 1, raf = null;
+  var t0 = 0;
+
+  function resize(){
+    var m = canvasDPR(cv);
+    W = m.w; H = m.h; dpr = m.dpr;
+  }
+  function frame(now){
+    if (!t0) t0 = now;
+    var t = (now - t0) / 1000;
+    var inset = Math.max(16, Math.min(W, H) * 0.13);
+    var box = { x: inset, y: inset, w: W - inset * 2, h: H - inset * 2 };
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    paintBackdrop(ctx, W, H);
+    paintGuides(ctx, box);
+
+    var path = buildPath('horizontal', box);
+    var speed = Math.max(18, Math.min(W, H) * 0.16);
+    var s = reduceMotion() ? path.total * 0.5 : t * speed;
+    var r = DB.settings.size * 0.62;
+    for (var i = 9; i >= 1; i--) {
+      var p = path.at(s - i * 7);
+      ctx.fillStyle = 'rgba(211,69,58,' + (0.04 + (1 - i / 9) * 0.16) + ')';
+      ctx.beginPath(); ctx.arc(p[0], p[1], r * (1 - i / 12), 0, 6.2832); ctx.fill();
+    }
+    var pos = path.at(s);
+    paintTarget(ctx, pos[0], pos[1], r, 1);
+    var vt = $('#viewerTime');
+    if (vt) vt.textContent = mmss(t);
+    raf = requestAnimationFrame(frame);
+  }
+  function start(){
+    if (raf) return;
+    resize();
+    raf = requestAnimationFrame(frame);
+  }
+  function stop(){ if (raf) { cancelAnimationFrame(raf); raf = null; t0 = 0; } }
+
+  window.addEventListener('resize', function(){ resize(); });
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) stop(); else start();
+  });
+  start();
+})();
+
+/* ============================================================
+   訓練狀態機
+   ============================================================ */
+var stageEl = $('#stage');
+var field = $('#field');
+var fctx = field.getContext('2d');
+var FW = 0, FH = 0, FDPR = 1;
+var S = null;          // 目前訓練
+var RAF = null, LAST = 0;
+var actx = null;
+
+function sizeField(){
+  var m = canvasDPR(field);
+  FW = m.w; FH = m.h; FDPR = m.dpr;
+}
+
+function audioCtx(){
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+
+function blip(freq){
+  if (!DB.settings.sound) return;
+  try {
+    var ctx = audioCtx();
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    var t = ctx.currentTime;
+    o.type = 'sine'; o.frequency.value = freq || 620;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.11, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + 0.75);
+  } catch (e) { /* 靜音環境不影響流程 */ }
+}
+
+/* ---------- 輕音樂：本機音檔，淡入淡出，不用合成音 ---------- */
+var bgm = null, fadeTimer = null;
+
+function musicStart(){
+  if (bgm === null) bgm = $('#bgm');
+  if (!DB.settings.music || !bgm || !bgm.paused) return;
+  clearInterval(fadeTimer);
+  bgm.volume = 0;
+  try {
+    var p = bgm.play();
+    if (p && p.catch) p.catch(function(){ /* 未取得播放許可時靜默 */ });
+  } catch (e) { return; }
+  fadeTimer = setInterval(function(){
+    if (bgm.paused) { clearInterval(fadeTimer); return; }
+    bgm.volume = Math.min(0.3, bgm.volume + 0.012);
+    if (bgm.volume >= 0.3) clearInterval(fadeTimer);
+  }, 120);
+}
+
+function musicStop(){
+  if (!bgm) return;
+  clearInterval(fadeTimer);
+  if (bgm.paused) { bgm.volume = 0; return; }
+  var v = bgm.volume;
+  fadeTimer = setInterval(function(){
+    v -= 0.02;
+    if (v <= 0) {
+      clearInterval(fadeTimer);
+      bgm.volume = 0;
+      bgm.pause();
+      bgm.currentTime = 0;
+    } else {
+      bgm.volume = v;
+    }
+  }, 120);
+}
+
+function syncMusicBtn(){
+  var b = $('#btnMusic');
+  if (!b) return;
+  b.classList.toggle('off', !DB.settings.music);
+  b.setAttribute('aria-pressed', DB.settings.music ? 'true' : 'false');
+}
+
+function buildCourse(week, len){
+  var set = (WEEK_SETS[week] || WEEK_SETS[1]).slice();
+  var prep = len === 3 ? 20 : 25;
+  var gap = len === 3 ? 16 : 22;
+  var budget = len * 60;
+  var gaps = set.length - 1;
+  var avail = budget - prep - gaps * gap;
+  var ws = set.map(function(id){ return EX[id].weight; });
+  var sum = ws.reduce(function(a, b){ return a + b; }, 0);
+  var segs = [{ kind: 'prep', id: 'prep', dur: prep, name: '準備' }];
+  var used = 0;
+  set.forEach(function(id, i){
+    var dur;
+    if (i === set.length - 1) dur = Math.max(20, avail - used);
+    else dur = Math.max(20, Math.round((avail * ws[i] / sum) / 5) * 5);
+    used += dur;
+    segs.push({ kind: 'exercise', id: id, dur: dur, name: EX[id].name });
+    if (i < set.length - 1) segs.push({ kind: 'gap', id: 'gap', dur: gap, name: '短休息' });
+  });
+  return segs;
+}
+
+function buildSingle(id){
+  var ex = EX[id];
+  var prep = 12;
+  var main = ex.kind === 'rest' ? 40 : 80;
+  var segs = [
+    { kind: 'prep', id: 'prep', dur: prep, name: '準備' },
+    { kind: 'exercise', id: id, dur: main, name: ex.name }
+  ];
+  if (id !== 'blink') {
+    segs.push({ kind: 'exercise', id: 'blink', dur: 30, name: EX.blink.name });
+  }
+  return segs;
+}
+
+function totalOf(segs){
+  return segs.reduce(function(a, s){ return a + s.dur; }, 0);
+}
+
+function openSession(segs){
+  if (S) return;
+  var total = totalOf(segs);
+  S = {
+    segs: segs, idx: 0, segT: 0, elapsed: 0,
+    total: total, state: 'count', countT: 0,
+    pauseCount: 0, done: [], task: { planned: 6, hit: 0, presented: 0, reactions: [] },
+    startedAt: new Date().toISOString()
+  };
+  stageEl.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('#restLayer').classList.remove('show');
+  $('#taskHud').hidden = true;
+  syncMusicBtn();
+  musicStart();
+  sizeField();
+  renderProgress();
+  renderCountdown(true);
+  onSegStart();
+  startLoop();
+}
+
+function renderCountdown(on){
+  var el = $('#countdown');
+  if (on) { $('#countNum').textContent = '3'; el.classList.add('show'); }
+  else el.classList.remove('show');
+}
+
+function startLoop(){
+  stopLoop();
+  LAST = 0;
+  RAF = requestAnimationFrame(tick);
+}
+function stopLoop(){ if (RAF) { cancelAnimationFrame(RAF); RAF = null; } }
+
+function cur(){
+  return S ? S.segs[S.idx] : null;
+}
+function isExercise(seg){
+  return seg && seg.kind === 'exercise';
+}
+
+function onSegStart(){
+  var seg = cur();
+  if (!seg) return;
+  var ex = EX[seg.id];
+  $('#stageName').textContent = seg.name;
+  $('#stagePrompt').innerHTML = seg.kind === 'prep'
+    ? '坐姿自然，螢幕略低於視線。<b>任何時候都能停止</b>。'
+    : (seg.kind === 'gap'
+      ? '眨眼幾次，或把視線移向遠處。<b>倒數結束會自動接續</b>。'
+      : (ex ? ex.prompt : ''));
+
+  var rest = $('#restLayer');
+  if (seg.kind === 'prep') {
+    rest.classList.remove('show');
+  } else if (seg.kind === 'gap') {
+    rest.classList.add('show');
+    $('#restLabel').textContent = '短休息';
+    $('#restTitle').textContent = '眨眼，或看向遠處';
+    $('#restText').textContent = '讓眼睛離開密集注視。倒數結束會自動接續下一個動作。';
+  } else if (ex && ex.kind === 'rest') {
+    rest.classList.add('show');
+    $('#restLabel').textContent = '休息';
+    if (ex.sub === 'nearfar') {
+      $('#restTitle').textContent = '把視線移開螢幕';
+      $('#restText').textContent = '看向窗外或房間最遠處（約 6 公尺外）。柔和注視，不瞇眼、不用力。';
+    } else {
+      $('#restTitle').textContent = '自然眨眼';
+      $('#restText').textContent = '讓眼皮自己眨動。不需要用力擠眼，也不要刻意撐住不眨。';
+    }
+  } else {
+    rest.classList.remove('show');
+  }
+
+  $('#taskHud').hidden = !(ex && ex.task);
+  if (ex && ex.task) initTask();
+
+  var btn = $('#btnPause');
+  btn.textContent = '暫停';
+  blip(seg.kind === 'gap' ? 520 : 680);
+  renderProgress();
+  $('#stageTotal').textContent = mmss(S.total);
+  drawFrame();
+}
+
+function tick(now){
+  var dt = LAST ? Math.min(0.08, (now - LAST) / 1000) : 0;
+  LAST = now;
+  if (S && S.state === 'count') {
+    S.countT += dt;
+    var n = Math.ceil(3 - S.countT);
+    $('#countNum').textContent = n > 0 ? String(n) : '1';
+    if (S.countT >= 3) {
+      renderCountdown(false);
+      S.state = 'run';
+      S.segT = 0;
+    }
+  } else if (S && S.state === 'run') {
+    S.segT += dt;
+    S.elapsed += dt;
+    var seg = cur();
+    if (seg && S.segT >= seg.dur) advance(S.segT - seg.dur);
+  }
+  if (S) { drawFrame(); syncHud(); RAF = requestAnimationFrame(tick); }
+  else { RAF = null; }
+}
+
+function advance(overflow){
+  var seg = cur();
+  if (!seg) return;
+  if (isExercise(seg)) S.done.push({ name: seg.name, dur: Math.min(seg.dur, S.segT) });
+  S.idx++;
+  if (S.idx >= S.segs.length) { finishSession(false); return; }
+  S.segT = Math.max(0, overflow || 0);
+  onSegStart();
+}
+
+function drawFrame(){
+  if (!S || !FW) return;
+  var seg = cur();
+  var ex = seg ? EX[seg.id] : null;
+  var box = fieldBox();
+  fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
+  paintBackdrop(fctx, FW, FH);
+
+  if (!seg) return;
+
+  if (seg.kind === 'prep') {
+    paintGuides(fctx, box);
+    var br = Math.min(box.w, box.h) * 0.12 * (1 + 0.06 * Math.sin(S.segT * 1.1));
+    var pcx = box.x + box.w / 2, pcy = box.y + box.h / 2;
+    fctx.strokeStyle = 'rgba(235,237,230,.22)';
+    fctx.lineWidth = 1;
+    fctx.beginPath(); fctx.arc(pcx, pcy, br, 0, 6.2832); fctx.stroke();
+    fctx.fillStyle = 'rgba(235,237,230,.10)';
+    fctx.beginPath(); fctx.arc(pcx, pcy, br * 0.42, 0, 6.2832); fctx.fill();
+    return;
+  }
+
+  if (ex && ex.kind === 'rest') {
+    if (ex.sub === 'blink') drawEye(box);
+    else drawHorizon(box);
+    return;
+  }
+
+  if (seg.kind === 'gap') {
+    paintGuides(fctx, box);
+    return;
+  }
+
+  paintGuides(fctx, box);
+  var r = Math.max(5, DB.settings.size / 2);
+  var cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+
+  if (ex && ex.kind === 'task') {
+    drawTask(box);
+    return;
+  }
+
+  if (ex && ex.kind === 'focus') {
+    var br2 = 1 + 0.05 * Math.sin(S.segT * 1.35);
+    fctx.strokeStyle = 'rgba(235,237,230,.10)';
+    fctx.lineWidth = 1;
+    fctx.beginPath(); fctx.arc(cx, cy, r * 6.2, 0, 6.2832); fctx.stroke();
+    fctx.strokeStyle = 'rgba(195,59,46,.20)';
+    fctx.beginPath(); fctx.arc(cx, cy, r * 2.6 * br2, 0, 6.2832); fctx.stroke();
+    paintTarget(fctx, cx, cy, r, 1);
+    return;
+  }
+
+  var path = buildPath(seg.id, box);
+  var speed = Math.min(box.w, box.h) * 0.2 * DB.settings.speed;
+  var s = S.segT * speed;
+  var steps = 8;
+  for (var i = steps; i >= 1; i--) {
+    var p = path.at(s - i * Math.max(5, r * 0.75));
+    var a = 0.03 + (1 - i / steps) * 0.15;
+    fctx.fillStyle = 'rgba(211,69,58,' + a.toFixed(3) + ')';
+    fctx.beginPath(); fctx.arc(p[0], p[1], r * (1 - i / (steps * 1.6)), 0, 6.2832); fctx.fill();
+  }
+  var pos = path.at(s);
+  paintTarget(fctx, pos[0], pos[1], r, 1);
+}
+
+function drawEye(box){
+  var cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+  var rx = Math.min(box.w * 0.4, 150);
+  var ry = rx * 0.46;
+  var cycle = (S.segT % 5.4) / 5.4;
+  var open = 1;
+  if (cycle > 0.88) {
+    var q = (cycle - 0.88) / 0.12;
+    open = q < 0.5 ? 1 - q * 2 : (q - 0.5) * 2;
+    open = Math.max(0, Math.min(1, open));
+  }
+  fctx.strokeStyle = 'rgba(235,237,230,.34)';
+  fctx.lineWidth = 1.4;
+  fctx.beginPath();
+  fctx.moveTo(cx - rx, cy);
+  fctx.quadraticCurveTo(cx, cy - ry * 2.2, cx + rx, cy);
+  fctx.quadraticCurveTo(cx, cy + ry * 2.2, cx - rx, cy);
+  fctx.stroke();
+
+  fctx.fillStyle = 'rgba(37,105,91,.9)';
+  fctx.beginPath();
+  fctx.ellipse(cx, cy, rx * 0.13, Math.max(0.5, ry * 0.62 * open), 0, 0, 6.2832);
+  fctx.fill();
+}
+
+function drawHorizon(box){
+  fctx.strokeStyle = 'rgba(235,237,230,.10)';
+  fctx.lineWidth = 1;
+  for (var i = 0; i < 4; i++) {
+    var y = box.y + box.h * (0.42 + i * 0.055);
+    fctx.globalAlpha = 0.28 - i * 0.06;
+    fctx.beginPath();
+    fctx.moveTo(box.x + box.w * 0.06, y);
+    fctx.lineTo(box.x + box.w * 0.94, y);
+    fctx.stroke();
+  }
+  fctx.globalAlpha = 1;
+}
+
+function initTask(){
+  S.task.hit = 0;
+  S.task.presented = 0;
+  S.task.reactions = [];
+  S.task.planned = Math.max(3, Math.round(cur().dur / 9));
+  spawnTask();
+}
+
+function spawnTask(){
+  var n = 5 + Math.floor(Math.random() * 3);
+  var tg = { x: 0.2 + Math.random() * 0.6, y: 0.24 + Math.random() * 0.52 };
+  var dots = [], tries = 0;
+  while (dots.length < n && tries < 300) {
+    tries++;
+    var p = { x: 0.13 + Math.random() * 0.74, y: 0.16 + Math.random() * 0.68 };
+    if (Math.hypot(p.x - tg.x, p.y - tg.y) < 0.24) continue;
+    var ok = true;
+    for (var i = 0; i < dots.length; i++) {
+      if (Math.hypot(dots[i].x - p.x, dots[i].y - p.y) < 0.14) { ok = false; break; }
+    }
+    if (ok) dots.push(p);
+  }
+  S.task.dots = dots;
+  S.task.target = tg;
+  S.task.spawnedAt = performance.now();
+  S.task.presented++;
+  updateHud();
+}
+
+function taskTargetPx(box){
+  var t = S.task.target;
+  return [
+    box.x + t.x * box.w,
+    box.y + t.y * box.h,
+    Math.max(20, DB.settings.size * 1.15)
+  ];
+}
+
+function drawTask(box){
+  S.task.dots.forEach(function(d){
+    fctx.fillStyle = 'rgba(235,237,230,.30)';
+    fctx.beginPath();
+    fctx.arc(box.x + d.x * box.w, box.y + d.y * box.h, 4.4, 0, 6.2832);
+    fctx.fill();
+  });
+  var tp = taskTargetPx(box);
+  paintTarget(fctx, tp[0], tp[1], tp[2] / 2, 1);
+  fctx.strokeStyle = 'rgba(235,237,230,.35)';
+  fctx.lineWidth = 1;
+  fctx.beginPath(); fctx.arc(tp[0], tp[1], tp[2] / 2 + 9, 0, 6.2832); fctx.stroke();
+}
+
+field.addEventListener('pointerdown', function(e){
+  if (!S || S.state !== 'run') return;
+  var seg = cur();
+  if (!seg || !EX[seg.id] || !EX[seg.id].task) return;
+  var rect = field.getBoundingClientRect();
+  var x = e.clientX - rect.left, y = e.clientY - rect.top;
+  var box = fieldBox();
+  var tp = taskTargetPx(box);
+  var dist = Math.hypot(x - tp[0], y - tp[1]);
+  if (dist <= tp[2] * 0.78) {
+    S.task.hit++;
+    S.task.reactions.push(performance.now() - S.task.spawnedAt);
+    spawnTask();
+    blip(880);
+  } else {
+    spawnTask();
+  }
+});
+
+function updateHud(){
+  var h = $('#taskHud');
+  if (!h || !S) return;
+  var last = S.task.reactions.length
+    ? Math.round(S.task.reactions[S.task.reactions.length - 1])
+    : null;
+  h.innerHTML = '任務 <b>' + S.task.hit + '</b> / ' + S.task.planned +
+    (last ? '<br>反應 <b>' + last + '</b> ms' : '');
+}
+function syncHud(){
+  if (!S) return;
+  $('#stageClock').textContent = mmss(S.elapsed);
+  var seg = cur();
+  if (!seg) return;
+  var bars = $('#stageProgress').children;
+  for (var i = 0; i < bars.length; i++) {
+    var b = bars[i].querySelector('b');
+    if (!b) continue;
+    if (i < S.idx) { bars[i].classList.add('done'); b.style.transform = 'scaleX(1)'; }
+    else if (i === S.idx) { b.style.transform = 'scaleX(' + Math.min(1, S.segT / S.segs[i].dur).toFixed(3) + ')'; }
+    else { b.style.transform = 'scaleX(0)'; }
+  }
+  if (seg.kind === 'gap' || (EX[seg.id] && EX[seg.id].kind === 'rest')) {
+    $('#restCount').textContent = String(Math.ceil(Math.max(0, seg.dur - S.segT)));
+  }
+}
+
+function renderProgress(){
+  var el = $('#stageProgress');
+  el.innerHTML = S.segs.map(function(s, i){
+    return '<i class="' + (s.kind === 'prep' ? 'prep' : s.kind === 'gap' ? 'gap' : '') + '" data-i="' + i + '"><b></b></i>';
+  }).join('');
+  $$('#stageProgress i').forEach(function(i){ i.style.cursor = 'default'; });
+}
+
+function buildRecord(aborted){
+  var tasks = S.task;
+  var plannedModules = S.segs.filter(isExercise).length;
+  var hadTask = S.segs.some(function(s){ return s.kind === 'exercise' && EX[s.id] && EX[s.id].task; });
+  return {
+    id: 's' + Date.now(),
+    at: new Date().toISOString(),
+    week: currentWeek(),
+    plannedSec: S.total,
+    actualSec: Math.round(S.elapsed),
+    modules: S.done.map(function(d){ return d.name; }),
+    plannedModules: plannedModules,
+    tasks: hadTask ? { planned: tasks.planned, hit: tasks.hit } : null,
+    comfort: '一般',
+    pauseCount: S.pauseCount,
+    aborted: !!aborted,
+    reason: aborted ? '自行停止' : ''
+  };
+}
+
+function finishSession(aborted){
+  var rec = buildRecord(aborted);
+  DB.sessions.push(rec);
+  if (DB.sessions.length > 200) DB.sessions = DB.sessions.slice(-200);
+  saveDB();
+  $('#restLayer').classList.remove('show');
+  hideStage();
+  renderReport(rec, aborted);
+  refreshAll();
+}
+
+function hideStage(){
+  stageEl.classList.remove('open');
+  S = null;
+  stopLoop();
+  musicStop();
+  document.body.style.overflow = '';
+}
+
+function sheetOpen(){
+  $('#sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function sheetClose(){
+  $('#sheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function adviceFor(v){
+  if (v === 'good') return '節奏合適。可以把時長維持在 4–5 分鐘，不必加快速度。';
+  if (v === 'tired') return '下次降低速度或縮短到 3 分鐘，動作之間多停一下。';
+  if (v === 'bad') return '先停止訓練並休息觀察。若不適持續，請尋求眼科評估。';
+  return '維持當前節奏，不以提速或延長作為目標。';
+}
+
+function renderReport(rec, aborted){
+  var cells = '';
+  cells += '<div class="rep-cell"><label>實際用時</label><strong>' + mmss(rec.actualSec) + '</strong></div>';
+  cells += '<div class="rep-cell"><label>完成模組</label><strong>' + rec.modules.length + '<small>/ ' + rec.plannedModules + '</small></strong></div>';
+  cells += '<div class="rep-cell"><label>任務進度</label><strong>' +
+    (rec.tasks ? rec.tasks.hit + '<small>/ ' + rec.tasks.planned + '</small>' : '—') +
+    '</strong></div>';
+  cells += '<div class="rep-cell"><label>暫停</label><strong>' + rec.pauseCount + '<small>次</small></strong></div>';
+
+  var d = new Date(rec.at);
+  $('#sheetBody').innerHTML =
+    '<div class="sheet-title"><h2>' + (aborted ? '已停止' : '本次訓練') + '</h2><span>' +
+      pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) +
+    '</span></div>' +
+    '<p class="sheet-sub">' + (aborted
+      ? '你選擇提前結束，這次的完成狀態已保存。不舒服是優先訊號，不需要補練。'
+      : '訓練記錄只反映完成行為與主觀感受，不代表視力或眼肌功能改善。') + '</p>' +
+    '<div class="rep-grid">' + cells + '</div>' +
+    '<p class="rep-note" id="repAdvice">' + adviceFor(rec.comfort) + '</p>' +
+    '<div class="comfort"><p>這次眼睛的感受？</p>' +
+      '<div class="comfort-opts" id="comfortOpts">' +
+        '<button data-comfort="good"' + (rec.comfort === '舒適' ? ' aria-pressed="true"' : '') + '>舒適</button>' +
+        '<button data-comfort="ok"' + (rec.comfort === '一般' ? ' aria-pressed="true"' : '') + '>一般</button>' +
+        '<button data-comfort="tired"' + (rec.comfort === '疲勞' ? ' aria-pressed="true"' : '') + ' data-v="bad">疲勞</button>' +
+        '<button data-comfort="bad" data-v="bad">不適</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sheet-actions">' +
+      '<button class="btn-quiet" data-act="close">返回</button>' +
+      '<button class="btn-primary" data-act="again">再練一次</button>' +
+    '</div>';
+  sheetOpen();
+  repRec = rec;
+}
+
+var repRec = null;
+var COMFORT = { good: '舒適', ok: '一般', tired: '疲勞', bad: '不適' };
+
+$('#sheetBody').addEventListener('click', function(e){
+  var cb = e.target.closest('[data-comfort]');
+  if (cb) {
+    var v = cb.getAttribute('data-comfort');
+    $$('#comfortOpts button').forEach(function(b){ b.removeAttribute('aria-pressed'); });
+    cb.setAttribute('aria-pressed', 'true');
+    if (repRec) {
+      repRec.comfort = COMFORT[v];
+      var adv = $('#repAdvice');
+      if (adv) adv.textContent = adviceFor(v);
+      var idx = DB.sessions.indexOf(repRec);
+      if (idx >= 0) { DB.sessions[idx].comfort = COMFORT[v]; saveDB(); }
+      refreshAll();
+    }
+    return;
+  }
+  var act = e.target.closest('[data-act]');
+  if (!act) return;
+  if (act.getAttribute('data-act') === 'again') {
+    sheetClose();
+    setTimeout(function(){ if (lastStart) lastStart(); else startAuto(); }, 60);
+  } else {
+    sheetClose();
+  }
+});
+
+/* 暫停 / 停止 / 關閉 */
+$('#btnPause').addEventListener('click', function(){
+  if (!S) return;
+  if (S.state === 'run') {
+    S.state = 'pause';
+    S.pauseCount++;
+    this.textContent = '繼續';
+    $('#stagePrompt').innerHTML = '已暫停。準備好再繼續，<b>進度不會跳動</b>。';
+  } else if (S.state === 'pause') {
+    S.state = 'run';
+    this.textContent = '暫停';
+    var seg = cur();
+    if (seg) $('#stagePrompt').innerHTML = seg.kind === 'prep' ? '坐姿自然，螢幕略低於視線。<b>任何時候都能停止</b>。' : (EX[seg.id] ? EX[seg.id].prompt : '');
+  }
+});
+
+function abortSession(){
+  if (!S) return;
+  finishSession(true);
+}
+$('#btnStop').addEventListener('click', abortSession);
+$('#stageClose').addEventListener('click', abortSession);
+
+$('#btnMusic').addEventListener('click', function(){
+  DB.settings.music = !DB.settings.music;
+  saveDB();
+  if (DB.settings.music) { musicStart(); toast('輕音樂已開啟'); }
+  else { musicStop(); toast('輕音樂已關閉'); }
+  syncMusicBtn();
+  renderSettings();
+});
+
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) {
+    musicStop();
+    setTimeout(function(){
+      if (document.hidden && bgm && !bgm.paused) { bgm.pause(); bgm.currentTime = 0; bgm.volume = 0; }
+    }, 600);
+    if (S && S.state === 'run') {
+      S.state = 'pause';
+      S.pauseCount++;
+      $('#btnPause').textContent = '繼續';
+    }
+  } else if (S && DB.settings.music) {
+    musicStart();
+  }
+});
+window.addEventListener('resize', function(){ if (S) sizeField(); });
+
+var lastStart = null;
+function startAuto(){
+  lastStart = startAuto;
+  openSession(buildCourse(currentWeek(), DB.settings.len));
+}
+function startSingle(id){
+  if (!EX[id]) return;
+  lastStart = function(){ startSingle(id); };
+  openSession(buildSingle(id));
+}
+
+/* ============================================================
+   視圖
+   ============================================================ */
+var THUMB = {
+  horizontal: '<line x1="5" y1="13" x2="39" y2="13" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="3.2" fill="#C33B2E"/><path d="M7 9.5l-3 3.5 3 3.5M37 9.5l3 3.5-3 3.5" stroke="#5C635D" stroke-width="1" fill="none" stroke-linecap="round"/>',
+  vertical: '<line x1="22" y1="4" x2="22" y2="22" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="3.2" fill="#C33B2E"/><path d="M18.5 6.5L22 3.5l3.5 3M18.5 19.5L22 22.5l3.5-3" stroke="#5C635D" stroke-width="1" fill="none" stroke-linecap="round"/>',
+  diagonal: '<line x1="7" y1="5" x2="37" y2="21" stroke="#9AA099" stroke-width="1"/><line x1="37" y1="5" x2="7" y2="21" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="3.2" fill="#C33B2E"/>',
+  circle: '<circle cx="22" cy="13" r="9" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="31" cy="13" r="3.2" fill="#C33B2E"/><circle cx="22" cy="13" r="1" fill="#5C635D"/>',
+  zigzag: '<polyline points="5,20 13,6 21,20 29,6 37,20" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="13" cy="6" r="3.2" fill="#C33B2E"/>',
+  fixation: '<circle cx="22" cy="13" r="7.5" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="2.8" fill="#C33B2E"/>',
+  recognize: '<circle cx="9" cy="8" r="1.6" fill="#9AA099"/><circle cx="17" cy="5.5" r="1.6" fill="#9AA099"/><circle cx="35" cy="8" r="1.6" fill="#9AA099"/><circle cx="31" cy="19" r="1.6" fill="#9AA099"/><circle cx="14" cy="19.5" r="1.6" fill="#9AA099"/><circle cx="24" cy="13" r="3" fill="#C33B2E"/>',
+  nearfar: '<path d="M4 21h36" stroke="#9AA099" stroke-width="1"/><circle cx="12" cy="17" r="3" fill="#9AA099"/><path d="M16 17l10-7" stroke="#9AA099" stroke-width="1" stroke-dasharray="2 3"/><path d="M24 8.5l4 1M24 8.5l1 4" stroke="#5C635D" stroke-width="1" fill="none"/>',
+  blink: '<path d="M7 13q15-10 30 0q-15 10-30 0z" fill="none" stroke="#9AA099" stroke-width="1"/><circle cx="22" cy="13" r="2.6" fill="#25695B"/>'
+};
+
+function modRow(id){
+  var ex = EX[id];
+  return '<button class="mod-row" data-ex="' + id + '">' +
+    '<span class="mod-thumb"><svg viewBox="0 0 44 26" aria-hidden="true">' + (THUMB[id] || '') + '</svg></span>' +
+    '<span class="mod-main">' +
+      '<span class="mod-name">' + ex.name + ' <em class="mod-tag' + (ex.task ? ' task' : '') + '">' + ex.tag + '</em></span>' +
+      '<span class="mod-desc">' + ex.desc + '</span>' +
+    '</span><span class="mod-arrow">›</span></button>';
+}
+
+function renderLibrary(){
+  var groups = [
+    ['追蹤掃視', ['horizontal', 'vertical', 'diagonal', 'circle', 'zigzag']],
+    ['注視與辨識', ['fixation', 'recognize']],
+    ['休息與恢復', ['nearfar', 'blink']]
+  ];
+  var el = $('#libraryList');
+  if (!el) return;
+  el.innerHTML = groups.map(function(g){
+    var rows = g[1].map(modRow).join('');
+    return '<div class="group-label" style="margin-top:22px">' + g[0] + '</div><div class="mod-list">' + rows + '</div>';
+  }).join('');
+}
+
+function renderHome(){
+  var w = currentWeek();
+  $('#heroWeek').textContent = w;
+  $('#factWeek').textContent = weekCount(w);
+  $('#factStreak').textContent = streakDays();
+  var avg = 0;
+  if (DB.sessions.length) {
+    avg = DB.sessions.reduce(function(a, s){ return a + s.actualSec; }, 0) / DB.sessions.length / 60;
+    avg = Math.round(avg * 10) / 10;
+  }
+  $('#factAvg').textContent = String(avg).replace(/\.0$/, '');
+  $('#startLen').textContent = DB.settings.len + ' 分';
+  $('#homeLen').value = DB.settings.len;
+  $('#homeLenOut').textContent = DB.settings.len + ' 分';
+  $('#streakText').textContent = DB.sessions.length ? '已規律 ' + streakDays() + ' 天' : '尚未開始';
+  $('#stripSub').textContent = '目前第 ' + w + ' 週 · 建議每週 3–4 次';
+
+  $('#tickChart').innerHTML = [1, 2, 3, 4].map(function(k){
+    var n = weekCount(k);
+    var pips = '';
+    for (var i = 1; i <= 4; i++) pips += '<i class="' + (n >= i ? 'on' : '') + '"></i>';
+    return '<div class="tick-col' + (k === w ? ' now' : '') + '">' +
+      '<div class="bars">' + pips + '</div>' +
+      '<label>W' + pad(k) + ' · ' + n + ' 次</label></div>';
+  }).join('');
+}
+
+function renderRecords(){
+  $('#sumCount').textContent = DB.sessions.length;
+  var mins = Math.round(DB.sessions.reduce(function(a, s){ return a + s.actualSec; }, 0) / 60);
+  $('#sumMin').textContent = mins;
+  $('#sumWeek').textContent = weekCount(currentWeek());
+  $('#recCount').textContent = DB.sessions.length ? '共 ' + DB.sessions.length + ' 筆' : '';
+
+  var list = $('#recList');
+  if (!DB.sessions.length) {
+    list.innerHTML = '<div class="empty"><b>還沒有訓練紀錄</b>完成第一次課程後，這裡會出現完成時長、模組與舒適度。</div>';
+    return;
+  }
+  list.innerHTML = DB.sessions.slice().reverse().slice(0, 40).map(function(s){
+    var d = new Date(s.at);
+    return '<div class="rec-row"><div>' +
+      '<div class="rec-when">' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' +
+        pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' · 第 ' + s.week + ' 週</div>' +
+      '<div class="rec-what">' + (s.modules.length ? s.modules.join(' · ') : '未完成任何模組') +
+        ' <span>' + (s.aborted ? '提前結束' : '完成') + '</span></div>' +
+      '</div><div class="rec-right">' +
+      '<div class="rec-dur">' + mmss(s.actualSec) + '</div>' +
+      '<div class="rec-comfort">' + s.comfort + (s.tasks ? ' · 任務 ' + s.tasks.hit + '/' + s.tasks.planned : '') + '</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function renderPlan(){
+  var w = currentWeek();
+  $$('#weekChips button').forEach(function(b){
+    b.setAttribute('aria-pressed', b.getAttribute('data-week') === String(DB.week) ? 'true' : 'false');
+  });
+  $$('#timeline .tl-row').forEach(function(row){
+    var k = parseInt(row.getAttribute('data-w'), 10);
+    row.classList.toggle('active', k === w);
+    row.classList.toggle('done', k < w);
+    var badge = row.querySelector('.tl-badge');
+    if (badge) badge.hidden = !(k === w);
+  });
+}
+
+function renderSettings(){
+  var st = DB.settings;
+  $('#setSpeed').value = st.speed;
+  $('#outSpeed').textContent = st.speed < 0.95 ? '慢' : st.speed < 1.3 ? '適中' : '快';
+  $('#setSize').value = st.size;
+  $('#outSize').textContent = st.size + ' px';
+  $('#setLen').value = st.len;
+  $('#outLen').textContent = st.len + ' 分鐘';
+  $('#outMusic').textContent = st.music ? '開啟' : '關閉';
+  $('#outSound').textContent = st.sound ? '開啟' : '關閉';
+  $('#outMotion').textContent = st.motion === 'on' ? '減少' : '跟隨系統';
+  $$('#setMusic button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-music') === (st.music ? '1' : '0') ? 'true' : 'false'); });
+  $$('#setSound button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-sound') === (st.sound ? '1' : '0') ? 'true' : 'false'); });
+  $$('#setMotion button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-motion') === st.motion ? 'true' : 'false'); });
+  syncMusicBtn();
+}
+
+function refreshAll(){
+  renderHome();
+  renderRecords();
+  renderPlan();
+  renderSettings();
+}
+
+/* 導覽 */
+function renderView(name){
+  if (!name) name = 'home';
+  $$('.view').forEach(function(v){
+    v.hidden = v.getAttribute('data-view') !== name;
+  });
+  $$('[data-go]').forEach(function(b){
+    if (b.classList.contains('btn-text')) return;
+    b.setAttribute('aria-current', b.getAttribute('data-go') === name ? 'true' : 'false');
+  });
+  window.scrollTo(0, 0);
+  window.dispatchEvent(new Event('resize'));
+}
+
+function go(name){
+  var h = '#/' + name;
+  if (location.hash !== h) location.hash = h;
+  else renderView(name);
+}
+window.addEventListener('hashchange', function(){
+  renderView((location.hash || '').replace('#/', '') || 'home');
+});
+
+document.addEventListener('click', function(e){
+  var g = e.target.closest('[data-go]');
+  if (g) { go(g.getAttribute('data-go')); return; }
+  var x = e.target.closest('[data-ex]');
+  if (x) { startSingle(x.getAttribute('data-ex')); return; }
+  var wk = e.target.closest('[data-week]');
+  if (wk) {
+    DB.week = parseInt(wk.getAttribute('data-week'), 10);
+    saveDB();
+    renderPlan();
+    renderHome();
+    toast('已切換到第 ' + DB.week + ' 週課表');
+    return;
+  }
+});
+
+/* 首頁與計畫的開始入口 */
+$('#btnStart').addEventListener('click', startAuto);
+$('#planStart').addEventListener('click', function(){
+  toast('第 ' + currentWeek() + ' 週課表：' + (WEEK_SETS[currentWeek()] || WEEK_SETS[1]).length + ' 個模組');
+  startAuto();
+});
+
+/* 設定 */
+$('#setSpeed').addEventListener('input', function(){
+  DB.settings.speed = parseFloat(this.value);
+  $('#outSpeed').textContent = DB.settings.speed < 0.95 ? '慢' : DB.settings.speed < 1.3 ? '適中' : '快';
+  saveDB();
+});
+$('#setSize').addEventListener('input', function(){
+  DB.settings.size = parseInt(this.value, 10);
+  $('#outSize').textContent = DB.settings.size + ' px';
+  saveDB();
+});
+$('#setLen').addEventListener('input', function(){ setLen(this.value); });
+$('#homeLen').addEventListener('input', function(){ setLen(this.value); });
+
+function setLen(v){
+  var n = parseInt(v, 10);
+  if (isNaN(n)) n = 5;
+  n = Math.min(5, Math.max(3, n));
+  DB.settings.len = n;
+  saveDB();
+  $('#setLen').value = n;
+  $('#homeLen').value = n;
+  $('#outLen').textContent = n + ' 分鐘';
+  $('#homeLenOut').textContent = n + ' 分';
+  $('#startLen').textContent = n + ' 分';
+}
+
+$('#setMusic').addEventListener('click', function(e){
+  var b = e.target.closest('[data-music]');
+  if (!b) return;
+  DB.settings.music = b.getAttribute('data-music') === '1';
+  saveDB(); renderSettings();
+  if (DB.settings.music) {
+    if (S) musicStart();
+    toast('訓練時會播放輕音樂');
+  } else {
+    musicStop();
+  }
+  syncMusicBtn();
+});
+
+$('#setSound').addEventListener('click', function(e){
+  var b = e.target.closest('[data-sound]');
+  if (!b) return;
+  DB.settings.sound = b.getAttribute('data-sound') === '1';
+  saveDB(); renderSettings();
+  if (DB.settings.sound) blip(700);
+});
+$('#setMotion').addEventListener('click', function(e){
+  var b = e.target.closest('[data-motion]');
+  if (!b) return;
+  DB.settings.motion = b.getAttribute('data-motion');
+  saveDB(); renderSettings();
+});
+
+$('#btnExport').addEventListener('click', function(){
+  var payload = {
+    app: 'EyeMotion',
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    settings: DB.settings,
+    sessions: DB.sessions
+  };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'eyemotion-' + dayKey(today()) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+  toast('已匯出 JSON 備份');
+});
+
+$('#btnClear').addEventListener('click', function(){
+  if (!DB.sessions.length) { toast('目前沒有紀錄'); return; }
+  if (!window.confirm('清除所有訓練紀錄？設定會保留，這個動作無法復原。')) return;
+  DB.sessions = [];
+  saveDB();
+  refreshAll();
+  toast('訓練紀錄已清除');
+});
+
+$('#btnPwa').addEventListener('click', function(){
+  toast('用瀏覽器選單的「安裝 / 加到主畫面」即可離線使用，需以 http(s) 或 localhost 開啟。');
+});
+
+/* 啟動 */
+renderLibrary();
+refreshAll();
+renderView((location.hash || '').replace('#/', '') || 'home');
+
+})();
+</script>
+
+</body>
+</html>

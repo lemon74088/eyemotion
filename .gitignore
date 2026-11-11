@@ -1,0 +1,6 @@
+# 發佈與備份的中間檔，不進版本控制
+_publish/
+_backup/
+*.zip
+Thumbs.db
+desktop.ini
